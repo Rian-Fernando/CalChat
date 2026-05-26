@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import { computeOverlapRegions } from "@/lib/overlap";
 import { SLOT_MS } from "@/lib/timezone";
 import TimezonePicker from "./TimezonePicker";
+import ParticipantFilter from "./ParticipantFilter";
 import type { Participant } from "@/lib/types";
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
   weekStartDate: string;
   viewerTimezone: string;
   onViewerTimezoneChange: (zone: string) => void;
+  /** Current viewer's participant ID, used to label them in the filter dropdown. */
+  currentParticipantId?: string | null;
 }
 
 interface CalendarBlock {
@@ -32,13 +35,31 @@ export default function CommonTimesCalendar({
   participants,
   weekStartDate,
   viewerTimezone,
-  onViewerTimezoneChange
+  onViewerTimezoneChange,
+  currentParticipantId
 }: Props) {
   const [minDuration, setMinDuration] = useState(15);
   const [showSolo, setShowSolo] = useState(false);
-  const total = participants.length;
 
-  const regions = useMemo(() => computeOverlapRegions(participants), [participants]);
+  // Per-viewer filter: tracked as the set of EXCLUDED ids so any new participant who
+  // joins later is automatically included in the calendar without us needing to re-sync.
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
+
+  const includedIds = useMemo(() => {
+    return new Set(participants.filter(p => !excludedIds.has(p.id)).map(p => p.id));
+  }, [participants, excludedIds]);
+
+  const filteredParticipants = useMemo(
+    () => participants.filter(p => includedIds.has(p.id)),
+    [participants, includedIds]
+  );
+
+  const total = filteredParticipants.length;
+
+  const regions = useMemo(
+    () => computeOverlapRegions(filteredParticipants),
+    [filteredParticipants]
+  );
 
   // Each day, expressed in the viewer's local timezone, gives us a [startMs, endMs) window
   const days = useMemo(() => {
@@ -57,7 +78,7 @@ export default function CommonTimesCalendar({
 
   // For each day, find the slice of each region that falls within it and build a block
   const blocksPerDay: CalendarBlock[][] = useMemo(() => {
-    const idToP = new Map(participants.map(p => [p.id, p]));
+    const idToP = new Map(filteredParticipants.map(p => [p.id, p]));
     const out: CalendarBlock[][] = Array.from({ length: 7 }, () => []);
 
     for (const r of regions) {
@@ -91,7 +112,7 @@ export default function CommonTimesCalendar({
       }
     }
     return out;
-  }, [regions, days, participants, total, showSolo, minDuration]);
+  }, [regions, days, filteredParticipants, total, showSolo, minDuration]);
 
   const anyBlocks = blocksPerDay.some(d => d.length > 0);
 
@@ -114,6 +135,23 @@ export default function CommonTimesCalendar({
         <div className="w-full sm:w-64">
           <TimezonePicker value={viewerTimezone} onChange={onViewerTimezoneChange} compact />
         </div>
+      </div>
+
+      {/* Participant filter */}
+      <div className="mb-4">
+        <ParticipantFilter
+          participants={participants}
+          selectedIds={includedIds}
+          onChange={nextIncluded => {
+            // Convert "included" set back to "excluded" set internally so newcomers default in.
+            const nextExcluded = new Set<string>();
+            for (const p of participants) {
+              if (!nextIncluded.has(p.id)) nextExcluded.add(p.id);
+            }
+            setExcludedIds(nextExcluded);
+          }}
+          currentId={currentParticipantId}
+        />
       </div>
 
       {/* Filters */}

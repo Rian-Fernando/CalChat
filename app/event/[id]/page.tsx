@@ -455,6 +455,7 @@ export default function EventPage() {
                 weekStartDate={event.weekStartDate}
                 viewerTimezone={viewerZone}
                 onViewerTimezoneChange={setViewerZone}
+                currentParticipantId={participantId}
               />
             )}
 
