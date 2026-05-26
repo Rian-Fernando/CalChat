@@ -12,9 +12,9 @@ import ShareBar from "@/components/ShareBar";
 import ParticipantList from "@/components/ParticipantList";
 import BestTimes from "@/components/BestTimes";
 import HoverDetails from "@/components/HoverDetails";
-import ColorPicker from "@/components/ColorPicker";
 import QuickAdd from "@/components/QuickAdd";
 import NotesBoard from "@/components/NotesBoard";
+import CommonTimesView from "@/components/CommonTimesView";
 import { SLOTS_PER_CELL } from "@/lib/timezone";
 import { firstAvailableColor, PARTICIPANT_COLORS } from "@/lib/colors";
 import type { CalendarEvent } from "@/lib/types";
@@ -33,7 +33,7 @@ function browserZone(): string {
   }
 }
 
-type Mode = "edit" | "view";
+type Mode = "edit" | "view" | "common";
 
 export default function EventPage() {
   const params = useParams<{ id: string }>();
@@ -209,13 +209,7 @@ export default function EventPage() {
     }
   };
 
-  // Colors taken by participants OTHER than me — used to disable swatches in the picker
-  const takenColors = useMemo(() => {
-    if (!event) return [];
-    return Object.values(event.participants)
-      .filter(p => p.id !== participantId)
-      .map(p => p.color);
-  }, [event, participantId]);
+  // (color picker only appears in onboarding; locked after first save)
 
   // Save just my note (preserves my existing availability/timezone/color server-side).
   const saveMyNote = async (note: string) => {
@@ -342,6 +336,14 @@ export default function EventPage() {
                 <span className="ml-1.5 text-xs text-ink-500">({participantsArray.length})</span>
               )}
             </button>
+            <button
+              onClick={() => setMode("common")}
+              className={`rounded-md px-4 py-1.5 text-sm transition ${
+                mode === "common" ? "bg-ink-700 text-ink-100" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              Common times
+            </button>
           </div>
           <div className="ml-auto flex items-center gap-2">
             {lastFetchedAt && (
@@ -377,18 +379,6 @@ export default function EventPage() {
                   <div className="w-full sm:w-64">
                     <TimezonePicker value={myZone} onChange={setMyZone} compact />
                   </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs uppercase tracking-wider text-ink-400">Your color</span>
-                    <span
-                      className="inline-block h-3 w-3 rounded-full ring-1 ring-ink-600"
-                      style={{ background: myColor }}
-                      title={myColor}
-                    />
-                  </div>
-                  <ColorPicker value={myColor} takenByOthers={takenColors} onChange={setMyColor} compact />
                 </div>
 
                 <QuickAdd
@@ -436,7 +426,7 @@ export default function EventPage() {
                   </div>
                 </div>
               </>
-            ) : (
+            ) : mode === "view" ? (
               <>
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -448,8 +438,8 @@ export default function EventPage() {
                   </div>
                 </div>
                 <p className="mb-3 text-xs text-ink-400">
-                  Darker green = more friends free in that 30-min window. A glow means everyone&apos;s free.
-                  Hover any cell for details.
+                  Each cell is split into stripes — one per friend, in their color. Full color =
+                  they&apos;re free, dim = busy. A green glow border means everyone is free.
                 </p>
                 <AvailabilityGrid
                   weekStartDate={event.weekStartDate}
@@ -459,9 +449,15 @@ export default function EventPage() {
                   onHoverStartSlot={setHoverStartSlot}
                 />
               </>
+            ) : (
+              <CommonTimesView
+                participants={participantsArray}
+                viewerTimezone={viewerZone}
+                onViewerTimezoneChange={setViewerZone}
+              />
             )}
 
-            {/* Shared notes board — visible in both modes, below the grid */}
+            {/* Shared notes board — visible in all modes, below the main panel */}
             <div className="mt-8 border-t border-ink-700 pt-6">
               <NotesBoard
                 participants={participantsArray}

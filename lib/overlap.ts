@@ -24,6 +24,59 @@ export function availabilityIndex(participants: Participant[]): Map<number, stri
   return map;
 }
 
+/** A contiguous run of 15-min slots during which the same exact set of participants is free. */
+export interface OverlapRegion {
+  startSlot: number;
+  endSlotExclusive: number;
+  participantIds: string[]; // sorted by id for stable comparisons
+}
+
+/** Walk every slot any participant has selected, and group consecutive slots that share
+ *  the same "who is available" set into a single region. Output is sorted by start slot. */
+export function computeOverlapRegions(participants: Participant[]): OverlapRegion[] {
+  if (participants.length === 0) return [];
+
+  const slotToIds = new Map<number, string[]>();
+  for (const p of participants) {
+    for (const s of p.availability) {
+      const arr = slotToIds.get(s);
+      if (arr) arr.push(p.id);
+      else slotToIds.set(s, [p.id]);
+    }
+  }
+  if (slotToIds.size === 0) return [];
+
+  const sortedSlots = Array.from(slotToIds.keys()).sort((a, b) => a - b);
+
+  const regions: OverlapRegion[] = [];
+  let start = sortedSlots[0];
+  let prev = sortedSlots[0];
+  let currentKey = slotToIds.get(start)!.slice().sort().join(",");
+
+  const flush = () => {
+    regions.push({
+      startSlot: start,
+      endSlotExclusive: prev + 1,
+      participantIds: currentKey.split(",")
+    });
+  };
+
+  for (let i = 1; i < sortedSlots.length; i++) {
+    const slot = sortedSlots[i];
+    const key = slotToIds.get(slot)!.slice().sort().join(",");
+    if (slot === prev + 1 && key === currentKey) {
+      prev = slot;
+    } else {
+      flush();
+      start = slot;
+      prev = slot;
+      currentKey = key;
+    }
+  }
+  flush();
+  return regions;
+}
+
 /** Group consecutive integer slots into contiguous (start, endExclusive) ranges. */
 export function groupIntoRanges(slots: number[]): { start: number; endExclusive: number }[] {
   if (slots.length === 0) return [];
