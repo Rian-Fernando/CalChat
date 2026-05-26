@@ -1,26 +1,29 @@
-// Diverse, distinguishable palette. Each participant gets a unique entry from this list.
-// Max participants per event = palette length (currently 20).
+// 22 distinct colors spanning the full rainbow. No duplicates, no near-duplicate pairs;
+// every color has a clearly different hue or lightness from its neighbours. Each participant
+// gets a unique entry from this list, so the event capacity is up to 22 unique participants.
 export const PARTICIPANT_COLORS = [
-  "#9ae6b4", // 1.  mint
-  "#90cdf4", // 2.  sky blue
-  "#fbb6ce", // 3.  soft pink
-  "#fbd38d", // 4.  amber
-  "#d6bcfa", // 5.  lavender
-  "#fed7aa", // 6.  peach
-  "#4fd1c5", // 7.  cyan
-  "#f687b3", // 8.  hot pink
-  "#9f7aea", // 9.  purple
-  "#f6ad55", // 10. orange
-  "#fc8181", // 11. coral red
-  "#fef08a", // 12. bright yellow
-  "#86efac", // 13. lime green
-  "#67e8f9", // 14. light cyan
-  "#c4b5fd", // 15. violet
-  "#fdba74", // 16. tangerine
-  "#fca5a5", // 17. salmon
-  "#a7f3d0", // 18. seafoam
-  "#f0abfc", // 19. magenta
-  "#bfdbfe"  // 20. powder blue
+  "#ef4444", // 1.  red
+  "#f97316", // 2.  orange
+  "#fb923c", // 3.  light orange
+  "#facc15", // 4.  yellow
+  "#fde047", // 5.  pale yellow
+  "#a3e635", // 6.  lime
+  "#22c55e", // 7.  green
+  "#4ade80", // 8.  light green
+  "#10b981", // 9.  emerald
+  "#2dd4bf", // 10. teal
+  "#06b6d4", // 11. cyan
+  "#67e8f9", // 12. light cyan
+  "#3b82f6", // 13. blue
+  "#60a5fa", // 14. light blue
+  "#6366f1", // 15. indigo
+  "#a78bfa", // 16. violet
+  "#c084fc", // 17. purple
+  "#d946ef", // 18. fuchsia
+  "#f0abfc", // 19. light fuchsia
+  "#ec4899", // 20. pink
+  "#f43f5e", // 21. rose
+  "#fda4af"  // 22. light rose
 ];
 
 export function isPaletteColor(c: string): boolean {

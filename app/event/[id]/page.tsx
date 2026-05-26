@@ -14,7 +14,7 @@ import BestTimes from "@/components/BestTimes";
 import HoverDetails from "@/components/HoverDetails";
 import QuickAdd from "@/components/QuickAdd";
 import NotesBoard from "@/components/NotesBoard";
-import CommonTimesView from "@/components/CommonTimesView";
+import CommonTimesCalendar from "@/components/CommonTimesCalendar";
 import { SLOTS_PER_CELL } from "@/lib/timezone";
 import { firstAvailableColor, PARTICIPANT_COLORS } from "@/lib/colors";
 import type { CalendarEvent } from "@/lib/types";
@@ -450,8 +450,9 @@ export default function EventPage() {
                 />
               </>
             ) : (
-              <CommonTimesView
+              <CommonTimesCalendar
                 participants={participantsArray}
+                weekStartDate={event.weekStartDate}
                 viewerTimezone={viewerZone}
                 onViewerTimezoneChange={setViewerZone}
               />
