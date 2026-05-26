@@ -15,18 +15,33 @@ function pickEnv(...names: string[]): string | undefined {
   return undefined;
 }
 
-const url = pickEnv(
-  "UPSTASH_REDIS_REST_URL",
-  "KV_REST_API_URL",
-  "STORAGE_REDIS_REST_URL",
-  "REDIS_URL"
-);
-const token = pickEnv(
-  "UPSTASH_REDIS_REST_TOKEN",
-  "KV_REST_API_TOKEN",
-  "STORAGE_REDIS_REST_TOKEN",
-  "REDIS_TOKEN"
-);
+// Try our preferred names first, then names the Vercel marketplace integration
+// produces when a custom prefix is applied (which concatenates with Vercel's
+// standard `_KV_REST_API_URL` / `_KV_REST_API_TOKEN` suffix).
+function findFirstByPattern(re: RegExp): string | undefined {
+  for (const [name, value] of Object.entries(process.env)) {
+    if (re.test(name) && value && value.length > 0) return value;
+  }
+  return undefined;
+}
+
+const url =
+  pickEnv(
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_KV_REST_API_URL",
+    "KV_REST_API_URL",
+    "STORAGE_REDIS_REST_URL",
+    "REDIS_URL"
+  ) ?? findFirstByPattern(/_KV_REST_API_URL$/);
+
+const token =
+  pickEnv(
+    "UPSTASH_REDIS_REST_TOKEN",
+    "UPSTASH_REDIS_REST_KV_REST_API_TOKEN",
+    "KV_REST_API_TOKEN",
+    "STORAGE_REDIS_REST_TOKEN",
+    "REDIS_TOKEN"
+  ) ?? findFirstByPattern(/_KV_REST_API_TOKEN$/);
 
 let kv: KV;
 
