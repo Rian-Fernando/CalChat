@@ -1,35 +1,39 @@
 import { NextResponse } from "next/server";
+import { kv } from "@/lib/redis";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Diagnostic endpoint. Reports presence of any env var name that looks Redis-related,
- * so we can spot what the Vercel Upstash integration actually created. NEVER returns
- * the values themselves — just the names + lengths.
+ * Diagnostic endpoint. Tells you whether the production runtime is talking to a real
+ * Redis (vs the in-memory fallback) by attempting an actual set/get round-trip.
+ * Never returns the values of any env vars.
  */
 export async function GET() {
+  const probeKey = `healthcheck:${Date.now()}`;
+  const probeValue = "ok";
+  let roundTripOk = false;
+  let roundTripError: string | null = null;
+  try {
+    await kv.set(probeKey, probeValue);
+    const got = await kv.get<string>(probeKey);
+    roundTripOk = got === probeValue;
+  } catch (e) {
+    roundTripError = e instanceof Error ? e.message : String(e);
+  }
+
   const namePattern = /(REDIS|UPSTASH|KV)/i;
   const candidates = Object.keys(process.env)
-    .filter(name => namePattern.test(name))
+    .filter(n => namePattern.test(n))
     .sort()
-    .map(name => ({
-      name,
-      length: (process.env[name] ?? "").length
-    }));
-
-  const expected = {
-    upstashUrlSet: Boolean(process.env.UPSTASH_REDIS_REST_URL),
-    upstashTokenSet: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
-    upstashUrlLength: (process.env.UPSTASH_REDIS_REST_URL ?? "").length,
-    upstashTokenLength: (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").length
-  };
+    .map(name => ({ name, length: (process.env[name] ?? "").length }));
 
   return NextResponse.json({
-    expected,
-    candidates,
+    persistentStore: roundTripOk ? "connected" : "in-memory fallback (data will be lost)",
+    roundTripOk,
+    roundTripError,
+    redisRelatedEnvNames: candidates,
     vercelEnv: process.env.VERCEL_ENV ?? null,
-    nodeEnv: process.env.NODE_ENV,
     region: process.env.VERCEL_REGION ?? null,
     timestamp: Date.now()
   });
