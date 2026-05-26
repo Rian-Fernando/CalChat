@@ -5,8 +5,28 @@ interface KV {
   set(key: string, value: unknown): Promise<unknown>;
 }
 
-const url = process.env.UPSTASH_REDIS_REST_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+// Accept any of the common env var names that the Upstash / Vercel KV / Redis
+// marketplace integrations create. Whichever pair exists first, we use.
+function pickEnv(...names: string[]): string | undefined {
+  for (const n of names) {
+    const v = process.env[n];
+    if (v && v.length > 0) return v;
+  }
+  return undefined;
+}
+
+const url = pickEnv(
+  "UPSTASH_REDIS_REST_URL",
+  "KV_REST_API_URL",
+  "STORAGE_REDIS_REST_URL",
+  "REDIS_URL"
+);
+const token = pickEnv(
+  "UPSTASH_REDIS_REST_TOKEN",
+  "KV_REST_API_TOKEN",
+  "STORAGE_REDIS_REST_TOKEN",
+  "REDIS_TOKEN"
+);
 
 let kv: KV;
 

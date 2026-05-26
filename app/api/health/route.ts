@@ -4,19 +4,30 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Diagnostic endpoint. Hit GET /api/health to see whether the Upstash env vars are wired
- * into the production runtime. Returns 200 with a JSON snapshot — no secret values are
- * disclosed, just presence flags + lengths.
+ * Diagnostic endpoint. Reports presence of any env var name that looks Redis-related,
+ * so we can spot what the Vercel Upstash integration actually created. NEVER returns
+ * the values themselves — just the names + lengths.
  */
 export async function GET() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const namePattern = /(REDIS|UPSTASH|KV)/i;
+  const candidates = Object.keys(process.env)
+    .filter(name => namePattern.test(name))
+    .sort()
+    .map(name => ({
+      name,
+      length: (process.env[name] ?? "").length
+    }));
+
+  const expected = {
+    upstashUrlSet: Boolean(process.env.UPSTASH_REDIS_REST_URL),
+    upstashTokenSet: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
+    upstashUrlLength: (process.env.UPSTASH_REDIS_REST_URL ?? "").length,
+    upstashTokenLength: (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").length
+  };
 
   return NextResponse.json({
-    upstashUrlSet: Boolean(url),
-    upstashUrlLength: url?.length ?? 0,
-    upstashTokenSet: Boolean(token),
-    upstashTokenLength: token?.length ?? 0,
+    expected,
+    candidates,
     vercelEnv: process.env.VERCEL_ENV ?? null,
     nodeEnv: process.env.NODE_ENV,
     region: process.env.VERCEL_REGION ?? null,
