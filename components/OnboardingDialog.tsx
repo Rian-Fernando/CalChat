@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import TimezonePicker from "./TimezonePicker";
+import ColorPicker from "./ColorPicker";
+import { firstAvailableColor } from "@/lib/colors";
 import type { Participant } from "@/lib/types";
 
 interface Props {
   initialName?: string;
   initialZone: string;
   existingParticipants: Participant[];
-  onSubmit: (name: string, zone: string) => void;
+  onSubmit: (name: string, zone: string, color: string) => void;
   onClaim: (participantId: string) => void;
 }
 
@@ -21,8 +23,10 @@ export default function OnboardingDialog({
 }: Props) {
   const [name, setName] = useState(initialName);
   const [zone, setZone] = useState(initialZone);
+  const takenByOthers = existingParticipants.map(p => p.color);
+  const [color, setColor] = useState(() => firstAvailableColor(takenByOthers));
 
-  const canSubmit = name.trim().length > 0 && zone.length > 0;
+  const canSubmit = name.trim().length > 0 && zone.length > 0 && color.length > 0;
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
@@ -68,7 +72,7 @@ export default function OnboardingDialog({
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => {
-            if (e.key === "Enter" && canSubmit) onSubmit(name.trim(), zone);
+            if (e.key === "Enter" && canSubmit) onSubmit(name.trim(), zone, color);
           }}
           placeholder="e.g. Rian"
           className="mb-5 w-full rounded-lg border border-ink-600 bg-ink-900/70 px-4 py-3 text-ink-100 placeholder:text-ink-500 transition focus:border-accent"
@@ -80,8 +84,16 @@ export default function OnboardingDialog({
         </label>
         <TimezonePicker value={zone} onChange={setZone} />
 
+        <label className="mb-2 mt-5 block text-xs uppercase tracking-wider text-ink-300">
+          Your color
+        </label>
+        <ColorPicker value={color} takenByOthers={takenByOthers} onChange={setColor} />
+        <p className="mt-2 text-[11px] text-ink-500">
+          Your selections will show up in this color so friends can tell whose cells are whose.
+        </p>
+
         <button
-          onClick={() => onSubmit(name.trim(), zone)}
+          onClick={() => onSubmit(name.trim(), zone, color)}
           disabled={!canSubmit}
           className="mt-6 w-full rounded-lg bg-accent px-4 py-3 font-medium text-ink-950 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
         >

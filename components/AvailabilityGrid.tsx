@@ -49,13 +49,13 @@ export default function AvailabilityGrid({
     forceRender(n => n + 1);
   }, [selected]);
 
-  // Per-slot availability count for view mode
-  const slotCounts = useMemo(() => {
-    const counts = new Map<number, number>();
-    for (const p of participants) {
-      for (const s of p.availability) counts.set(s, (counts.get(s) ?? 0) + 1);
-    }
-    return counts;
+  // For view mode: build a participantId -> Set<slot> lookup so we can answer
+  // "is this participant free during slot X?" in O(1).
+  const participantSlotSets = useMemo(() => {
+    return participants.map(p => ({
+      participant: p,
+      set: new Set(p.availability)
+    }));
   }, [participants]);
 
   const totalParticipants = participants.length;
@@ -110,26 +110,17 @@ export default function AvailabilityGrid({
     }
   };
 
-  const renderCellClasses = (slots: readonly number[]) => {
-    if (mode === "edit") {
-      return cellIsSelected(slots)
-        ? "bg-accent/80 hover:bg-accent"
-        : "bg-ink-800/60 hover:bg-ink-700/80";
-    }
-    if (totalParticipants === 0) return "bg-ink-800/40";
-    const density =
-      slots.reduce((sum, s) => sum + (slotCounts.get(s) ?? 0), 0) /
-      (slots.length * totalParticipants);
-    if (density === 0) return "bg-ink-800/40";
-    if (density >= 0.95) return "bg-accent ring-1 ring-accent-strong";
-    if (density >= 0.66) return "bg-accent/60";
-    if (density >= 0.33) return "bg-accent/35";
-    return "bg-accent/20";
+  // Determine if all participants are fully free during the cell — gives the glow border.
+  const cellIsFullOverlap = (slots: readonly number[]): boolean => {
+    if (totalParticipants === 0) return false;
+    return participantSlotSets.every(({ set }) => slots.every(s => set.has(s)));
   };
 
-  const cellIsFullOverlap = (slots: readonly number[]) =>
-    totalParticipants > 0 &&
-    slots.every(s => (slotCounts.get(s) ?? 0) === totalParticipants);
+  // EDIT-mode classes — single accent fill
+  const editModeClasses = (slots: readonly number[]) =>
+    cellIsSelected(slots)
+      ? "bg-accent/80 hover:bg-accent"
+      : "bg-ink-800/60 hover:bg-ink-700/80";
 
   return (
     <div
@@ -153,7 +144,7 @@ export default function AvailabilityGrid({
         ))}
       </div>
 
-      {/* Body: 48 half-hour rows */}
+      {/* Body */}
       <div>
         {Array.from({ length: CELLS_PER_DAY }).map((_, cellIndex) => {
           const isHourStart = cellIndex % 2 === 0;
@@ -174,6 +165,7 @@ export default function AvailabilityGrid({
                 const cell = day.cells[cellIndex];
                 const slots = cell.slots;
                 const isFull = mode === "view" && cellIsFullOverlap(slots);
+
                 return (
                   <button
                     key={`${day.dayIndex}-${cellIndex}`}
@@ -190,21 +182,54 @@ export default function AvailabilityGrid({
                     }}
                     onPointerLeave={() => onHoverStartSlot?.(null)}
                     style={{
-                      // visually separate hour starts with a thin top border
-                      borderTop: isHourStart ? "1px solid rgba(58, 65, 81, 0.45)" : "none",
-                      // very subtle inner gap between half-hours within the same hour
-                      borderBottom: !isHourStart ? "none" : undefined
+                      borderTop: isHourStart ? "1px solid rgba(58, 65, 81, 0.45)" : "none"
                     }}
-                    className={`h-[18px] transition-colors ${renderCellClasses(slots)} ${
-                      isFull ? "shadow-[0_0_0_1px_rgba(154,230,180,0.9)]" : ""
-                    } ${mode === "edit" ? "cursor-pointer" : "cursor-default"} ${
-                      isHourStart ? "rounded-t-sm" : "rounded-b-sm"
-                    }`}
+                    className={`h-[18px] overflow-hidden transition-colors ${
+                      mode === "edit" ? editModeClasses(slots) : ""
+                    } ${isFull ? "shadow-[0_0_0_1px_rgba(154,230,180,0.9)]" : ""} ${
+                      mode === "edit" ? "cursor-pointer" : "cursor-default"
+                    } ${isHourStart ? "rounded-t-sm" : "rounded-b-sm"}`}
                     type="button"
                     aria-label={`${day.date.toFormat("EEE LLL d")} ${hourLabel(hour)}${
                       isHourStart ? "" : ":30"
                     }`}
-                  />
+                  >
+                    {/* View-mode: render per-participant vertical stripes inside the cell.
+                        Each participant gets an equal-width column; their stripe is colored
+                        when they're free during this 30-min window, dark when busy,
+                        half-opacity when partially free (1 of 2 slots). */}
+                    {mode === "view" && participantSlotSets.length > 0 && (
+                      <div className="flex h-full w-full">
+                        {participantSlotSets.map(({ participant, set }) => {
+                          const freeSlots = slots.reduce(
+                            (acc, s) => acc + (set.has(s) ? 1 : 0),
+                            0
+                          );
+                          if (freeSlots === 0) {
+                            return (
+                              <span
+                                key={participant.id}
+                                className="block bg-ink-800/40"
+                                style={{ flex: 1 }}
+                              />
+                            );
+                          }
+                          const opacity = freeSlots / SLOTS_PER_CELL;
+                          return (
+                            <span
+                              key={participant.id}
+                              className="block"
+                              style={{
+                                flex: 1,
+                                background: participant.color,
+                                opacity
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </button>
                 );
               })}
             </div>

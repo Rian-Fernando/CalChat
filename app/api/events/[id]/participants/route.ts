@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kv } from "@/lib/redis";
 import { isValidZone } from "@/lib/timezone";
-import { nextColor } from "@/lib/colors";
+import { firstAvailableColor, isPaletteColor } from "@/lib/colors";
 import type { CalendarEvent, Participant, UpsertParticipantPayload } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -31,13 +31,48 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
 
   const existing = event.participants[participantId];
-  const order = Object.keys(event.participants).length;
+
+  // Colors taken by OTHER participants (the current one can keep its own)
+  const takenByOthers = Object.values(event.participants)
+    .filter(p => p.id !== participantId)
+    .map(p => p.color);
+
+  let color: string;
+  const requested = body.color;
+  if (typeof requested === "string") {
+    if (!isPaletteColor(requested)) {
+      return NextResponse.json({ error: "Invalid color (not in palette)" }, { status: 400 });
+    }
+    if (takenByOthers.includes(requested)) {
+      return NextResponse.json(
+        { error: "That color is already taken — please pick another", takenByOthers },
+        { status: 409 }
+      );
+    }
+    color = requested;
+  } else {
+    // Back-compat: no color requested → keep existing or auto-assign first free
+    color = existing?.color ?? firstAvailableColor(takenByOthers);
+  }
+
+  const noteRaw = body.note;
+  let note: string | undefined;
+  if (typeof noteRaw === "string") {
+    note = noteRaw.slice(0, 500);
+  } else if (noteRaw === null) {
+    note = undefined;
+  } else {
+    // not provided — preserve existing
+    note = existing?.note;
+  }
+
   const participant: Participant = {
     id: participantId,
     name: name.trim().slice(0, 40),
     timezone,
     availability: Array.from(new Set(availability)).sort((a, b) => a - b),
-    color: existing?.color ?? nextColor(order),
+    color,
+    note,
     updatedAt: Date.now()
   };
 

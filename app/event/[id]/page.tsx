@@ -12,7 +12,11 @@ import ShareBar from "@/components/ShareBar";
 import ParticipantList from "@/components/ParticipantList";
 import BestTimes from "@/components/BestTimes";
 import HoverDetails from "@/components/HoverDetails";
+import ColorPicker from "@/components/ColorPicker";
+import QuickAdd from "@/components/QuickAdd";
+import NotesBoard from "@/components/NotesBoard";
 import { SLOTS_PER_CELL } from "@/lib/timezone";
+import { firstAvailableColor, PARTICIPANT_COLORS } from "@/lib/colors";
 import type { CalendarEvent } from "@/lib/types";
 
 const ThreeBackground = dynamic(() => import("@/components/ThreeBackground"), { ssr: false });
@@ -42,6 +46,7 @@ export default function EventPage() {
 
   const [myName, setMyName] = useState<string>("");
   const [myZone, setMyZone] = useState<string>(browserZone());
+  const [myColor, setMyColor] = useState<string>(PARTICIPANT_COLORS[0]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
 
   const [mode, setMode] = useState<Mode>("edit");
@@ -109,6 +114,7 @@ export default function EventPage() {
       setParticipantId(stored);
       setMyName(me.name);
       setMyZone(me.timezone);
+      setMyColor(me.color);
       setSelected(new Set(me.availability));
       setViewerZone(me.timezone);
       setShowOnboarding(false);
@@ -125,11 +131,12 @@ export default function EventPage() {
     }
   }, [event, eventId]);
 
-  const onOnboardingSubmit = (name: string, zone: string) => {
+  const onOnboardingSubmit = (name: string, zone: string, color: string) => {
     const pid = nanoid(12);
     setParticipantId(pid);
     setMyName(name);
     setMyZone(zone);
+    setMyColor(color);
     setViewerZone(zone);
     if (typeof window !== "undefined") {
       localStorage.setItem(LS_PID(eventId), pid);
@@ -148,6 +155,7 @@ export default function EventPage() {
     setParticipantId(claimedId);
     setMyName(target.name);
     setMyZone(target.timezone);
+    setMyColor(target.color);
     setViewerZone(target.timezone);
     setSelected(new Set(target.availability));
     if (typeof window !== "undefined") {
@@ -169,14 +177,27 @@ export default function EventPage() {
           participantId,
           name: myName.trim(),
           timezone: myZone,
+          color: myColor,
           availability: Array.from(selected)
         })
       });
-      if (!res.ok) throw new Error(`Save failed (${res.status})`);
+      if (!res.ok) {
+        if (res.status === 409) {
+          // Color collision — server tells us what's taken; pick the next free one
+          const data = await res.json().catch(() => null);
+          const taken: string[] = (data?.takenByOthers ?? []) as string[];
+          const next = firstAvailableColor(taken);
+          setMyColor(next);
+          alert(
+            `That color was just taken by someone else. We picked ${next} for you — hit Save again.`
+          );
+          return;
+        }
+        throw new Error(`Save failed (${res.status})`);
+      }
       const updated: CalendarEvent = await res.json();
       setEvent(updated);
       setSavedAt(Date.now());
-      // persist last-used
       if (typeof window !== "undefined") {
         localStorage.setItem(LS_LAST_NAME, myName.trim());
         localStorage.setItem(LS_LAST_ZONE, myZone);
@@ -186,6 +207,37 @@ export default function EventPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Colors taken by participants OTHER than me — used to disable swatches in the picker
+  const takenColors = useMemo(() => {
+    if (!event) return [];
+    return Object.values(event.participants)
+      .filter(p => p.id !== participantId)
+      .map(p => p.color);
+  }, [event, participantId]);
+
+  // Save just my note (preserves my existing availability/timezone/color server-side).
+  const saveMyNote = async (note: string) => {
+    if (!participantId) return;
+    const res = await fetch(`/api/events/${eventId}/participants`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        participantId,
+        name: myName.trim() || "Anon",
+        timezone: myZone,
+        color: myColor,
+        availability: Array.from(selected),
+        note
+      })
+    });
+    if (!res.ok) {
+      alert("Couldn't save your note");
+      return;
+    }
+    const updated: CalendarEvent = await res.json();
+    setEvent(updated);
   };
 
   if (loadError) {
@@ -251,6 +303,23 @@ export default function EventPage() {
           </div>
         </header>
 
+        {/* Greeting — so you always know which entry this browser is editing */}
+        {participantId && myName && (
+          <div className="mb-3 flex items-center gap-2 text-sm">
+            <span className="text-ink-400">Hi,</span>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-700 bg-ink-900/60 px-2.5 py-0.5"
+            >
+              <span
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: myColor }}
+              />
+              <span className="text-ink-100">{myName}</span>
+            </span>
+            <span className="text-ink-500">— editing your own entry</span>
+          </div>
+        )}
+
         {/* Mode toggle */}
         <div className="mb-5 flex items-center gap-2">
           <div className="inline-flex rounded-lg border border-ink-700 bg-ink-900/60 p-1">
@@ -309,7 +378,27 @@ export default function EventPage() {
                     <TimezonePicker value={myZone} onChange={setMyZone} compact />
                   </div>
                 </div>
-                <p className="mb-3 text-xs text-ink-400">
+
+                <div className="mb-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs uppercase tracking-wider text-ink-400">Your color</span>
+                    <span
+                      className="inline-block h-3 w-3 rounded-full ring-1 ring-ink-600"
+                      style={{ background: myColor }}
+                      title={myColor}
+                    />
+                  </div>
+                  <ColorPicker value={myColor} takenByOthers={takenColors} onChange={setMyColor} compact />
+                </div>
+
+                <QuickAdd
+                  weekStartDate={event.weekStartDate}
+                  timezone={myZone}
+                  selected={selected}
+                  onChange={setSelected}
+                />
+
+                <p className="mb-3 mt-4 text-xs text-ink-400">
                   Click and drag to mark when you&apos;re free — each cell is 30 minutes, so you
                   can start at the hour or the half-hour. Drag across an already-selected area to deselect.
                 </p>
@@ -371,6 +460,15 @@ export default function EventPage() {
                 />
               </>
             )}
+
+            {/* Shared notes board — visible in both modes, below the grid */}
+            <div className="mt-8 border-t border-ink-700 pt-6">
+              <NotesBoard
+                participants={participantsArray}
+                currentId={participantId}
+                onSaveMyNote={saveMyNote}
+              />
+            </div>
           </section>
 
           {/* Right: side panel */}
