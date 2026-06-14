@@ -304,8 +304,8 @@ export default function ThreeBackground() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10"
-      style={{ contain: "strict" }}
+      className="pointer-events-none fixed inset-0"
+      style={{ contain: "strict", zIndex: 1 }}
     >
       <Canvas
         camera={{ position: [0, 0, 5], fov: 50 }}

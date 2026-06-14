@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <>
       <ThreeBackground />
-      <main className="relative mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
+      <main className="above-bg mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
         <div className="animate-fade-in text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.3em] text-ink-300">calchat</p>
           <h1 className="mb-4 text-4xl font-medium tracking-tight text-ink-100 sm:text-5xl">

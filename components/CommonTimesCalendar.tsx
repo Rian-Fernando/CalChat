@@ -15,6 +15,8 @@ interface Props {
   onViewerTimezoneChange: (zone: string) => void;
   /** Current viewer's participant ID, used to label them in the filter dropdown. */
   currentParticipantId?: string | null;
+  /** Optional: lets a viewer jump to a different week from the "other weeks" list. */
+  onJumpToWeek?: (mondayISO: string) => void;
 }
 
 interface CalendarBlock {
@@ -36,7 +38,8 @@ export default function CommonTimesCalendar({
   weekStartDate,
   viewerTimezone,
   onViewerTimezoneChange,
-  currentParticipantId
+  currentParticipantId,
+  onJumpToWeek
 }: Props) {
   const [minDuration, setMinDuration] = useState(15);
   const [showSolo, setShowSolo] = useState(false);
@@ -115,6 +118,32 @@ export default function CommonTimesCalendar({
   }, [regions, days, filteredParticipants, total, showSolo, minDuration]);
 
   const anyBlocks = blocksPerDay.some(d => d.length > 0);
+
+  // "Overlaps in other weeks" — scan EVERY region we computed, group by the Monday-week
+  // (in viewer's TZ) that its start lands on, and surface the ones that aren't the
+  // currently viewed week. Lets users discover viable times further out without having
+  // to click through weeks blindly.
+  const otherWeeks = useMemo(() => {
+    if (!onJumpToWeek) return [] as { monday: string; count: number; longestMin: number }[];
+    const byWeek = new Map<string, { count: number; longestMin: number }>();
+    for (const r of regions) {
+      const ps = r.participantIds.filter(id => includedIds.has(id));
+      if (ps.length < 2) continue;
+      const durationMin = (r.endSlotExclusive - r.startSlot) * 15;
+      if (durationMin < minDuration) continue;
+      const startDt = DateTime.fromMillis(r.startSlot * SLOT_MS, { zone: viewerTimezone });
+      const monday = startDt.minus({ days: startDt.weekday - 1 }).toFormat("yyyy-LL-dd");
+      if (monday === weekStartDate) continue;
+      const cur = byWeek.get(monday) ?? { count: 0, longestMin: 0 };
+      byWeek.set(monday, {
+        count: cur.count + 1,
+        longestMin: Math.max(cur.longestMin, durationMin)
+      });
+    }
+    return Array.from(byWeek.entries())
+      .map(([monday, info]) => ({ monday, ...info }))
+      .sort((a, b) => a.monday.localeCompare(b.monday));
+  }, [regions, includedIds, minDuration, viewerTimezone, weekStartDate, onJumpToWeek]);
 
   if (participants.length === 0) {
     return (
@@ -252,9 +281,62 @@ export default function CommonTimesCalendar({
 
       {!anyBlocks && (
         <p className="mt-3 text-center text-xs text-ink-400">
-          No overlapping windows match the current filters. Try lowering the min duration or
-          enabling single-person windows.
+          No overlapping windows match the current filters in this week. Try lowering the min
+          duration, enabling single-person windows, or jumping to another week below.
         </p>
+      )}
+
+      {/* Other weeks with overlaps */}
+      {otherWeeks.length > 0 && onJumpToWeek && (
+        <div className="mt-5 rounded-lg border border-ink-700 bg-ink-900/40 p-3">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h4 className="text-xs uppercase tracking-wider text-ink-300">
+              Overlaps in other weeks
+            </h4>
+            <span className="text-[11px] text-ink-500">
+              {otherWeeks.length} other week{otherWeeks.length === 1 ? "" : "s"} with matches
+            </span>
+          </div>
+          <ul className="space-y-1.5">
+            {otherWeeks.slice(0, 12).map(w => {
+              const sun = DateTime.fromISO(w.monday).plus({ days: 6 });
+              return (
+                <li key={w.monday}>
+                  <button
+                    type="button"
+                    onClick={() => onJumpToWeek(w.monday)}
+                    className="flex w-full items-center justify-between gap-3 rounded-md border border-ink-700 bg-ink-900/60 px-3 py-2 text-left text-xs transition hover:border-accent/40 hover:bg-ink-800"
+                  >
+                    <span className="text-ink-100">
+                      Week of{" "}
+                      <span className="font-medium">
+                        {DateTime.fromISO(w.monday).toFormat("LLL d")}
+                      </span>
+                      <span className="text-ink-400"> – {sun.toFormat("LLL d, yyyy")}</span>
+                    </span>
+                    <span className="flex items-center gap-3 text-[11px] text-ink-400">
+                      <span>{w.count} window{w.count === 1 ? "" : "s"}</span>
+                      <span className="rounded bg-accent/15 px-1.5 py-0.5 text-accent">
+                        longest{" "}
+                        {w.longestMin >= 60
+                          ? `${Math.floor(w.longestMin / 60)}h${
+                              w.longestMin % 60 ? ` ${w.longestMin % 60}m` : ""
+                            }`
+                          : `${w.longestMin}m`}
+                      </span>
+                      <span className="text-ink-500">→</span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {otherWeeks.length > 12 && (
+            <p className="mt-2 text-[11px] text-ink-500">
+              + {otherWeeks.length - 12} more weeks with overlaps (showing 12)
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

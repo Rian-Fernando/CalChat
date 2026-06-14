@@ -158,7 +158,7 @@ export default function AvailabilityGrid({
                 marginTop: isHourStart && cellIndex !== 0 ? 2 : 0
               }}
             >
-              <div className="flex h-[18px] items-center pr-2 text-right text-[10px] tabular-nums text-ink-400">
+              <div className="grid-cell-touch flex h-[18px] items-center pr-2 text-right text-[10px] tabular-nums text-ink-400">
                 {isHourStart ? hourLabel(hour) : <span className="text-ink-600">·</span>}
               </div>
               {grid.map(day => {
@@ -184,7 +184,7 @@ export default function AvailabilityGrid({
                     style={{
                       borderTop: isHourStart ? "1px solid rgba(58, 65, 81, 0.45)" : "none"
                     }}
-                    className={`h-[18px] overflow-hidden transition-colors ${
+                    className={`grid-cell-touch h-[18px] overflow-hidden transition-colors ${
                       mode === "edit" ? editModeClasses(slots) : ""
                     } ${isFull ? "shadow-[0_0_0_1px_rgba(154,230,180,0.9)]" : ""} ${
                       mode === "edit" ? "cursor-pointer" : "cursor-default"

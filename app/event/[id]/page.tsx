@@ -15,6 +15,7 @@ import HoverDetails from "@/components/HoverDetails";
 import QuickAdd from "@/components/QuickAdd";
 import NotesBoard from "@/components/NotesBoard";
 import CommonTimesCalendar from "@/components/CommonTimesCalendar";
+import WeekNavigator from "@/components/WeekNavigator";
 import { SLOTS_PER_CELL } from "@/lib/timezone";
 import { firstAvailableColor, PARTICIPANT_COLORS } from "@/lib/colors";
 import type { CalendarEvent } from "@/lib/types";
@@ -52,6 +53,9 @@ export default function EventPage() {
   const [mode, setMode] = useState<Mode>("edit");
   const [viewerZone, setViewerZone] = useState<string>(browserZone());
   const [hoverStartSlot, setHoverStartSlot] = useState<number | null>(null);
+  // Per-viewer state for which week is currently displayed. Defaults to the event's
+  // suggested start once we load it. Each visitor navigates independently.
+  const [viewedWeekStart, setViewedWeekStart] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -87,6 +91,14 @@ export default function EventPage() {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  // First time we successfully load the event, anchor the viewed week to the event's suggested
+  // weekStartDate. After that, the viewer can navigate freely without re-anchoring.
+  useEffect(() => {
+    if (event && viewedWeekStart === null) {
+      setViewedWeekStart(event.weekStartDate);
+    }
+  }, [event, viewedWeekStart]);
 
   // Auto-refresh every 5 minutes when in view mode (and tab is visible).
   // We skip edit mode to avoid surprising the user mid-drag.
@@ -238,7 +250,7 @@ export default function EventPage() {
     return (
       <>
         <ThreeBackground />
-        <main className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
+        <main className="above-bg mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
           <h1 className="mb-3 text-2xl text-ink-100">Hmm.</h1>
           <p className="mb-6 text-sm text-ink-400">{loadError}</p>
           <a href="/" className="rounded-lg bg-accent px-4 py-2 text-sm text-ink-950 hover:bg-accent-strong">
@@ -253,7 +265,7 @@ export default function EventPage() {
     return (
       <>
         <ThreeBackground />
-        <main className="relative mx-auto flex min-h-screen max-w-md items-center justify-center text-sm text-ink-400">
+        <main className="above-bg mx-auto flex min-h-screen max-w-md items-center justify-center text-sm text-ink-400">
           Loading...
         </main>
       </>
@@ -261,6 +273,9 @@ export default function EventPage() {
   }
 
   const participantsArray = Object.values(event.participants).sort((a, b) => a.updatedAt - b.updatedAt);
+  // The week the user is currently looking at — defaults to event.weekStartDate until
+  // the first-load effect sets it, then the user can navigate freely.
+  const week = viewedWeekStart ?? event.weekStartDate;
 
   return (
     <>
@@ -277,7 +292,7 @@ export default function EventPage() {
         />
       )}
 
-      <main className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <main className="above-bg mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         {/* Header */}
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -285,11 +300,12 @@ export default function EventPage() {
               calchat
             </a>
             <h1 className="mt-1 text-2xl font-medium text-ink-100 sm:text-3xl">{event.title}</h1>
-            <p className="text-sm text-ink-400">
-              Week of{" "}
-              <span className="text-ink-200">
+            <p className="text-xs text-ink-500">
+              Started planning for the week of{" "}
+              <span className="text-ink-300">
                 {DateTime.fromISO(event.weekStartDate).toFormat("LLL d, yyyy")}
               </span>
+              {" · navigate freely below"}
             </p>
           </div>
           <div className="w-full sm:w-[420px]">
@@ -313,6 +329,12 @@ export default function EventPage() {
             <span className="text-ink-500">— editing your own entry</span>
           </div>
         )}
+
+        {/* Week navigator — visible in every mode so users can plan any week, not just the
+            current one. State is per-viewer (each browser navigates independently). */}
+        <div className="card mb-4 rounded-xl p-3">
+          <WeekNavigator value={week} onChange={setViewedWeekStart} timezone={myZone} />
+        </div>
 
         {/* Mode toggle */}
         <div className="mb-5 flex items-center gap-2">
@@ -382,7 +404,7 @@ export default function EventPage() {
                 </div>
 
                 <QuickAdd
-                  weekStartDate={event.weekStartDate}
+                  weekStartDate={week}
                   timezone={myZone}
                   selected={selected}
                   onChange={setSelected}
@@ -393,7 +415,7 @@ export default function EventPage() {
                   can start at the hour or the half-hour. Drag across an already-selected area to deselect.
                 </p>
                 <AvailabilityGrid
-                  weekStartDate={event.weekStartDate}
+                  weekStartDate={week}
                   timezone={myZone}
                   mode="edit"
                   selected={selected}
@@ -442,7 +464,7 @@ export default function EventPage() {
                   they&apos;re free, dim = busy. A green glow border means everyone is free.
                 </p>
                 <AvailabilityGrid
-                  weekStartDate={event.weekStartDate}
+                  weekStartDate={week}
                   timezone={viewerZone}
                   mode="view"
                   participants={participantsArray}
@@ -452,10 +474,11 @@ export default function EventPage() {
             ) : (
               <CommonTimesCalendar
                 participants={participantsArray}
-                weekStartDate={event.weekStartDate}
+                weekStartDate={week}
                 viewerTimezone={viewerZone}
                 onViewerTimezoneChange={setViewerZone}
                 currentParticipantId={participantId}
+                onJumpToWeek={setViewedWeekStart}
               />
             )}
 

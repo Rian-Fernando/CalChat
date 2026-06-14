@@ -6,8 +6,9 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-html,
-body {
+/* html owns the solid fallback color so the page is dark even before the
+   three.js canvas mounts or if WebGL is unavailable. */
+html {
   background: #08090c;
   color: #e6eaf2;
   font-family: var(--font-sans);
@@ -15,26 +16,42 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* body itself is transparent so the fixed canvas underneath is visible.
+   The subtle radial gradients still belong to the page chrome — they sit on
+   a fixed pseudo-element behind the canvas so they don't fight with it. */
 body {
-  background-image: radial-gradient(
-    1200px 600px at 20% -10%,
-    rgba(154, 230, 180, 0.06),
-    transparent 60%
-  ),
-  radial-gradient(900px 500px at 90% 10%, rgba(144, 205, 244, 0.05), transparent 60%);
+  background: transparent;
   min-height: 100vh;
 }
 
-/* Hide native scrollbars on the grid container for cleanliness */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* below the canvas (z-index: 1), above page fallback */
+  background-image: radial-gradient(
+      1200px 600px at 20% -10%,
+      rgba(154, 230, 180, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at 90% 10%, rgba(144, 205, 244, 0.05), transparent 60%);
+  pointer-events: none;
+}
+
+/* Anything that should sit ON TOP of the canvas just gets .above-bg */
+.above-bg {
+  position: relative;
+  z-index: 10;
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Subtle inset border helper */
 .card {
-  background: rgba(19, 22, 29, 0.7);
+  background: rgba(19, 22, 29, 0.72);
   border: 1px solid rgba(58, 65, 81, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 button:focus-visible,
@@ -44,8 +61,14 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
-/* Prevent text selection during drag-select on the availability grid */
 .no-select {
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Larger tap targets on touch devices so the half-hour grid stays usable on phones */
+@media (hover: none) and (pointer: coarse) {
+  .grid-cell-touch {
+    min-height: 22px;
+  }
 }
