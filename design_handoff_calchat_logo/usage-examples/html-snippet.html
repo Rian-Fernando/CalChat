@@ -1,0 +1,69 @@
+<!doctype html>
+<!-- Plain-HTML header example. Not production; adapt to your stack.
+     Demonstrates the logo system using only the assets in ../assets/. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>CalChat — header example</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.svg">
+
+  <!-- Brand font: required for the wordmark inside the SVG to render on-brand. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+  <!-- Brand tokens -->
+  <link rel="stylesheet" href="../tokens.css">
+
+  <style>
+    body { margin: 0; background: var(--cc-paper); color: var(--cc-ink); font-family: var(--cc-font-body); }
+
+    header.site {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--cc-rule);
+    }
+    header.site a.brand { display: block; }
+    header.site a.brand img { display: block; height: 30px; width: auto; }
+
+    nav.site { display: flex; gap: 28px; font-size: 15px; }
+    nav.site a { color: var(--cc-ink); text-decoration: none; }
+    nav.site a:hover { color: var(--cc-accent); }
+
+    section.dark {
+      margin-top: 80px; padding: 40px 32px;
+      background: #15130e; color: var(--cc-paper);
+    }
+    section.dark img { display: block; height: 26px; width: auto; }
+  </style>
+</head>
+<body>
+
+  <header class="site">
+    <a class="brand" href="/" aria-label="CalChat home">
+      <img src="../assets/logo-lockup-horizontal.svg" alt="CalChat" />
+    </a>
+    <nav class="site" aria-label="Primary">
+      <a href="/groups">Groups</a>
+      <a href="/timezones">Time zones</a>
+      <a href="/settings">Settings</a>
+    </nav>
+  </header>
+
+  <main style="padding: 60px 32px;">
+    <p style="font-size: 14px; color: var(--cc-muted); max-width: 60ch;">
+      The header above demonstrates the primary lockup at 30px tall. The wordmark
+      inside the SVG is live text bound to Inter Tight — keep that font loaded.
+    </p>
+  </main>
+
+  <section class="dark">
+    <img src="../assets/logo-lockup-horizontal-light.svg" alt="CalChat" />
+    <p style="margin-top: 16px; font-size: 14px; color: rgba(244,239,230,0.6);">
+      Dark-surface variant — use <code>logo-lockup-horizontal-light.svg</code>.
+    </p>
+  </section>
+
+</body>
+</html>

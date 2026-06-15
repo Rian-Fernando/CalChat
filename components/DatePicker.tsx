@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
 
@@ -9,12 +10,19 @@ interface Props {
   value: string;
   onChange: (iso: string) => void;
   onClose: () => void;
+  /** The trigger element this popover anchors under. Required so the popover can
+   *  position itself in viewport coordinates without being trapped in the trigger's
+   *  stacking context. */
+  anchorRef: React.RefObject<HTMLElement>;
 }
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const POPOVER_WIDTH = 320;
+const VIEWPORT_PAD = 8;
 
-export default function DatePicker({ open, value, onChange, onClose }: Props) {
+export default function DatePicker({ open, value, onChange, onClose, anchorRef }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [viewMonth, setViewMonth] = useState(() =>
     DateTime.fromISO(value).isValid
       ? DateTime.fromISO(value).startOf("month")
@@ -28,17 +36,49 @@ export default function DatePicker({ open, value, onChange, onClose }: Props) {
     }
   }, [open, value]);
 
-  // Outside click closes
+  // Position the popover under the anchor; keep it inside the viewport.
+  // Re-runs on scroll + resize so the popover follows the trigger.
+  useEffect(() => {
+    if (!open) {
+      setPosition(null);
+      return;
+    }
+    const update = () => {
+      const el = anchorRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      let left = rect.left;
+      if (left + POPOVER_WIDTH > window.innerWidth - VIEWPORT_PAD) {
+        left = Math.max(VIEWPORT_PAD, window.innerWidth - POPOVER_WIDTH - VIEWPORT_PAD);
+      }
+      if (left < VIEWPORT_PAD) left = VIEWPORT_PAD;
+      const top = rect.bottom + 8;
+      setPosition({ top, left });
+    };
+    update();
+    window.addEventListener("resize", update);
+    // capture=true so we get the event even when scrolling happens deep in the tree
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open, anchorRef]);
+
+  // Outside-click closes — but ignore clicks on the trigger so toggling works
   useEffect(() => {
     if (!open) return;
     const onDocClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+      const target = e.target as Node;
+      if (ref.current && ref.current.contains(target)) return;
+      if (anchorRef.current && anchorRef.current.contains(target)) return;
+      onClose();
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, [open, onClose]);
+  }, [open, onClose, anchorRef]);
 
-  // ESC closes
+  // Esc closes
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -48,7 +88,8 @@ export default function DatePicker({ open, value, onChange, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !position) return null;
+  if (typeof window === "undefined") return null;
 
   const firstOfMonth = viewMonth.startOf("month");
   const gridStart = firstOfMonth.minus({ days: firstOfMonth.weekday - 1 });
@@ -59,11 +100,21 @@ export default function DatePicker({ open, value, onChange, onClose }: Props) {
     ? selDt.minus({ days: selDt.weekday - 1 }).toFormat("yyyy-LL-dd")
     : "";
 
-  return (
+  return createPortal(
     <div
       ref={ref}
-      className="card animate-fade-in absolute right-0 z-40 mt-2 w-[320px] rounded-xl p-3"
-      style={{ background: "rgba(12, 14, 19, 0.95)" }}
+      className="animate-fade-in rounded-xl border border-ink-600 shadow-2xl shadow-black/60"
+      style={{
+        position: "fixed",
+        top: position.top,
+        left: position.left,
+        width: POPOVER_WIDTH,
+        zIndex: 9999,
+        background: "rgba(12, 14, 19, 0.97)",
+        backdropFilter: "blur(14px) saturate(110%)",
+        WebkitBackdropFilter: "blur(14px) saturate(110%)",
+        padding: 12
+      }}
       role="dialog"
       aria-modal="false"
       aria-label="Pick a date"
@@ -184,8 +235,9 @@ export default function DatePicker({ open, value, onChange, onClose }: Props) {
         >
           Jump to today
         </button>
-        <span className="text-ink-500">Snaps to that week's Monday</span>
+        <span className="text-ink-500">Snaps to that week&apos;s Monday</span>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

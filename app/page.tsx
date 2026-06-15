@@ -49,7 +49,13 @@ export default function Home() {
       <ThreeBackground />
       <main className="above-bg mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
         <div className="animate-fade-in text-center">
-          <p className="mb-3 text-xs uppercase tracking-[0.3em] text-ink-300">calchat</p>
+          {/* Brand lockup — terracotta accent fills the intersection of the two squares */}
+          <img
+            src="/brand/logo-lockup-horizontal-light.svg"
+            alt="CalChat"
+            height={48}
+            className="mx-auto mb-6 h-12 w-auto"
+          />
           <h1 className="mb-4 text-4xl font-medium tracking-tight text-ink-100 sm:text-5xl">
             Find a time that works,
             <br />

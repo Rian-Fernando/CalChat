@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DateTime } from "luxon";
 import { currentWeekMondayISO } from "@/lib/timezone";
 import DatePicker from "./DatePicker";
@@ -22,6 +22,7 @@ function mondayOf(isoDate: string): string {
 
 export default function WeekNavigator({ value, onChange, timezone }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const monday = DateTime.fromISO(value);
   const sunday = monday.plus({ days: 6 });
@@ -60,25 +61,26 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
           ‹ Prev
         </button>
 
-        {/* Date label opens the custom dark-theme picker */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setPickerOpen(o => !o)}
-            className="ml-1 rounded-md border border-ink-600 bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
-            title="Pick any week — full month + year navigation inside"
-            aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-          >
-            {label}
-          </button>
-          <DatePicker
-            open={pickerOpen}
-            value={value}
-            onChange={iso => onChange(mondayOf(iso))}
-            onClose={() => setPickerOpen(false)}
-          />
-        </div>
+        {/* Date label opens the custom dark-theme picker (portaled to body so it
+            escapes the navigator card's stacking context) */}
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setPickerOpen(o => !o)}
+          className="ml-1 rounded-md border border-ink-600 bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
+          title="Pick any week — full month + year navigation inside"
+          aria-haspopup="dialog"
+          aria-expanded={pickerOpen}
+        >
+          {label}
+        </button>
+        <DatePicker
+          open={pickerOpen}
+          value={value}
+          onChange={iso => onChange(mondayOf(iso))}
+          onClose={() => setPickerOpen(false)}
+          anchorRef={triggerRef}
+        />
 
         <button
           type="button"

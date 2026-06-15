@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CalChat — Brand guide</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+  <link rel="stylesheet" href="tokens.css">
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--cc-paper); color: var(--cc-ink); font-family: var(--cc-font-body); }
+    body { padding: 64px clamp(24px, 5vw, 80px) 120px; max-width: 1280px; margin: 0 auto; }
+
+    .meta { font-family: var(--cc-font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cc-muted); }
+    h1.hero { font-family: var(--cc-font-display); font-weight: 800; font-size: clamp(48px, 7vw, 96px); letter-spacing: -0.04em; line-height: 0.95; margin: 12px 0 24px; }
+    h1.hero em { font-style: normal; color: var(--cc-accent); }
+    p.lede { font-size: 18px; line-height: 1.55; max-width: 60ch; color: var(--cc-ink-2); margin: 0 0 56px; }
+
+    h2 { font-family: var(--cc-font-display); font-weight: 700; font-size: 28px; letter-spacing: -0.02em; margin: 80px 0 4px; }
+    h2 .num { font-family: var(--cc-font-mono); font-weight: 500; font-size: 14px; color: var(--cc-muted); letter-spacing: 0.14em; margin-right: 14px; }
+    h2 + p.sub { color: var(--cc-muted); font-size: 14px; margin: 0 0 28px; max-width: 60ch; line-height: 1.5; }
+
+    hr.rule { border: 0; border-top: 1px solid var(--cc-rule); margin: 0; }
+
+    /* ------- showcase blocks ------- */
+    .showcase {
+      display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px;
+    }
+    .panel {
+      background: var(--cc-paper); border: 1px solid var(--cc-rule);
+      padding: 32px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 200px; position: relative;
+    }
+    .panel.dark { background: #15130e; border-color: #2e2a22; }
+    .panel.solid { background: var(--cc-paper-2); }
+    .panel.tight { padding: 24px; min-height: 140px; }
+    .panel img { display: block; max-width: 100%; }
+
+    .panel .tag {
+      position: absolute; top: 12px; left: 14px;
+      font-family: var(--cc-font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--cc-muted);
+    }
+    .panel.dark .tag { color: #8a8273; }
+
+    .span-12 { grid-column: span 12; }
+    .span-8  { grid-column: span 8; }
+    .span-6  { grid-column: span 6; }
+    .span-4  { grid-column: span 4; }
+    .span-3  { grid-column: span 3; }
+    @media (max-width: 800px) {
+      .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; }
+    }
+
+    /* ------- color swatches ------- */
+    .swatch {
+      border: 1px solid var(--cc-rule);
+      border-radius: 4px; overflow: hidden;
+      display: grid; grid-template-rows: 120px auto;
+    }
+    .swatch .chip { width: 100%; height: 100%; }
+    .swatch .info { padding: 14px 16px; background: var(--cc-paper); }
+    .swatch .name { font-weight: 600; font-size: 14px; }
+    .swatch .hex { font-family: var(--cc-font-mono); font-size: 12px; color: var(--cc-muted); margin-top: 2px; }
+    .swatch .use { font-size: 12px; color: var(--cc-muted); margin-top: 6px; line-height: 1.45; }
+
+    /* ------- size scale ------- */
+    .sizes { display: flex; align-items: flex-end; gap: 40px; flex-wrap: wrap; padding: 8px 0; }
+    .size-item { text-align: center; }
+    .size-item .label { font-family: var(--cc-font-mono); font-size: 10px; color: var(--cc-muted); margin-top: 10px; letter-spacing: 0.1em; }
+    .size-item img { display: block; }
+
+    /* ------- type spec ------- */
+    .type-spec { display: grid; grid-template-columns: 220px 1fr; gap: 48px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--cc-rule); }
+    .type-spec:last-child { border-bottom: 0; }
+    .type-spec .label { font-family: var(--cc-font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cc-muted); }
+    .type-spec .sample { font-family: var(--cc-font-display); }
+
+    /* ------- don'ts ------- */
+    .dont-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    @media (max-width: 800px) { .dont-grid { grid-template-columns: 1fr 1fr; } }
+    .dont {
+      border: 1px solid var(--cc-rule); border-radius: 4px;
+      padding: 24px; min-height: 160px;
+      display: grid; place-items: center; position: relative;
+    }
+    .dont .label {
+      position: absolute; bottom: 12px; left: 14px; right: 14px;
+      font-size: 12px; color: var(--cc-ink-2); line-height: 1.4;
+    }
+    .dont .label strong { display: block; color: var(--cc-accent); font-weight: 600; margin-bottom: 2px; font-family: var(--cc-font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* clearspace diagram */
+    .clearspace-svg { display: block; width: 100%; max-width: 520px; height: auto; }
+
+    /* footer */
+    footer { margin-top: 100px; padding-top: 32px; border-top: 1px solid var(--cc-rule); font-family: var(--cc-font-mono); font-size: 11px; color: var(--cc-muted); letter-spacing: 0.06em; display: flex; justify-content: space-between; }
+
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+
+  <div class="meta">CalChat · Brand guide · v1.0</div>
+  <h1 class="hero">Two schedules,<br/>one <em>overlap</em>.</h1>
+  <p class="lede">
+    CalChat is a calendar tool for friends in different time zones. The mark — two outlined squares
+    meeting at a terracotta intersection — is the brand idea made visual. The wordmark stays
+    quiet so the mark can carry the meaning.
+  </p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">01</span>Primary lockup</h2>
+  <p class="sub">Use this in almost every context. The mark sits to the left, the wordmark sits to its right. Don't separate them by more than the mark's width.</p>
+
+  <div class="showcase">
+    <div class="panel span-12" style="padding: 56px; min-height: 220px;">
+      <img src="assets/logo-lockup-horizontal.svg" alt="CalChat" style="height: 90px;">
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">02</span>Variations</h2>
+  <p class="sub">Pick the variant that matches your surface. Color → paper, light → dark, mono → restrained contexts where a single ink reads cleaner.</p>
+
+  <div class="showcase">
+    <div class="panel span-6">
+      <span class="tag">Default</span>
+      <img src="assets/logo-lockup-horizontal.svg" alt="" style="height: 56px;">
+    </div>
+    <div class="panel solid span-6">
+      <span class="tag">On panel</span>
+      <img src="assets/logo-lockup-horizontal.svg" alt="" style="height: 56px;">
+    </div>
+    <div class="panel dark span-6">
+      <span class="tag">Light · on dark</span>
+      <img src="assets/logo-lockup-horizontal-light.svg" alt="" style="height: 56px;">
+    </div>
+    <div class="panel span-6">
+      <span class="tag">Mono</span>
+      <img src="assets/logo-lockup-horizontal-mono.svg" alt="" style="height: 56px;">
+    </div>
+
+    <div class="panel span-4">
+      <span class="tag">Stacked</span>
+      <img src="assets/logo-lockup-stacked.svg" alt="" style="height: 140px;">
+    </div>
+    <div class="panel dark span-4">
+      <span class="tag">Stacked · light</span>
+      <img src="assets/logo-lockup-stacked-light.svg" alt="" style="height: 140px;">
+    </div>
+    <div class="panel span-4">
+      <span class="tag">Stacked · mono</span>
+      <img src="assets/logo-lockup-stacked-mono.svg" alt="" style="height: 140px;">
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">03</span>Mark alone</h2>
+  <p class="sub">Use the mark for avatars, favicons, watermarks, loading spinners, and any context where the wordmark would be redundant or too small to read.</p>
+
+  <div class="showcase">
+    <div class="panel span-3">
+      <span class="tag">Mark</span>
+      <img src="assets/logo-mark.svg" alt="" style="height: 120px;">
+    </div>
+    <div class="panel span-3">
+      <span class="tag">Mono</span>
+      <img src="assets/logo-mark-mono.svg" alt="" style="height: 120px;">
+    </div>
+    <div class="panel dark span-3">
+      <span class="tag">Light</span>
+      <img src="assets/logo-mark-light.svg" alt="" style="height: 120px;">
+    </div>
+    <div class="panel dark span-3">
+      <span class="tag">Light mono</span>
+      <img src="assets/logo-mark-light-mono.svg" alt="" style="height: 120px;">
+    </div>
+
+    <div class="panel span-12">
+      <span class="tag">Size scale</span>
+      <div class="sizes">
+        <div class="size-item"><img src="assets/logo-mark.svg" style="height: 96px"><div class="label">96 px</div></div>
+        <div class="size-item"><img src="assets/logo-mark.svg" style="height: 64px"><div class="label">64 px</div></div>
+        <div class="size-item"><img src="assets/logo-mark.svg" style="height: 40px"><div class="label">40 px</div></div>
+        <div class="size-item"><img src="assets/logo-mark.svg" style="height: 24px"><div class="label">24 px</div></div>
+        <div class="size-item"><img src="assets/favicon.svg" style="height: 32px"><div class="label">favicon · 32 px</div></div>
+        <div class="size-item"><img src="assets/favicon.svg" style="height: 16px"><div class="label">favicon · 16 px</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">04</span>Wordmark</h2>
+  <p class="sub">Lowercase Inter Tight 700, letter-spacing −0.04em. The wordmark sits on its own only in long-form contexts (legal pages, body copy) where the mark would be redundant.</p>
+
+  <div class="showcase">
+    <div class="panel span-6"><img src="assets/logo-wordmark.svg" alt="" style="height: 70px;"></div>
+    <div class="panel dark span-6"><img src="assets/logo-wordmark-light.svg" alt="" style="height: 70px;"></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">05</span>Color</h2>
+  <p class="sub">Three roles: paper (the surface), ink (the content), terracotta (the overlap). Everything else is supporting cast.</p>
+
+  <div class="showcase">
+    <div class="swatch span-3">
+      <div class="chip" style="background: #f4efe6;"></div>
+      <div class="info">
+        <div class="name">Paper</div>
+        <div class="hex">#f4efe6 · --cc-paper</div>
+        <div class="use">Primary background. Warm cream — reads as paper, not plastic.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #ebe4d4;"></div>
+      <div class="info">
+        <div class="name">Paper-2</div>
+        <div class="hex">#ebe4d4 · --cc-paper-2</div>
+        <div class="use">Panel / card background. One step deeper than paper.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #16140f;"></div>
+      <div class="info">
+        <div class="name">Ink</div>
+        <div class="hex">#16140f · --cc-ink</div>
+        <div class="use">Primary text and mark outlines. Warm near-black.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #c4634a;"></div>
+      <div class="info">
+        <div class="name">Accent</div>
+        <div class="hex">#c4634a · --cc-accent</div>
+        <div class="use"><strong style="color:var(--cc-ink)">Terracotta.</strong> Only where two things overlap, agree, or align.</div>
+      </div>
+    </div>
+
+    <div class="swatch span-3">
+      <div class="chip" style="background: #2a2620;"></div>
+      <div class="info">
+        <div class="name">Ink-2</div>
+        <div class="hex">#2a2620 · --cc-ink-2</div>
+        <div class="use">Secondary text.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #d6cdb9;"></div>
+      <div class="info">
+        <div class="name">Rule</div>
+        <div class="hex">#d6cdb9 · --cc-rule</div>
+        <div class="use">Hairlines and dividers.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #8a8273;"></div>
+      <div class="info">
+        <div class="name">Muted</div>
+        <div class="hex">#8a8273 · --cc-muted</div>
+        <div class="use">Captions, time labels, metadata.</div>
+      </div>
+    </div>
+    <div class="swatch span-3">
+      <div class="chip" style="background: #e3a995;"></div>
+      <div class="info">
+        <div class="name">Accent-soft</div>
+        <div class="hex">#e3a995 · --cc-accent-soft</div>
+        <div class="use">Soft accent for availability washes and hover.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">06</span>Typography</h2>
+  <p class="sub">Inter Tight does almost everything. JetBrains Mono handles time labels, timezone codes, and metadata so the brand feels precise where it matters.</p>
+
+  <div>
+    <div class="type-spec">
+      <div class="label">Display · 72 / 700 / −0.04</div>
+      <div class="sample" style="font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1;">Wednesday 4 — 6 pm</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">H1 · 48 / 700 / −0.03</div>
+      <div class="sample" style="font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;">Find when everyone's free</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">H2 · 32 / 600 / −0.02</div>
+      <div class="sample" style="font-size: 30px; font-weight: 600; letter-spacing: -0.02em;">Tokyo · London · Mexico City</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">Body · 16 / 400</div>
+      <div class="sample" style="font-size: 16px; font-weight: 400; line-height: 1.55; max-width: 56ch;">Drag across your calendar to mark when you're free. Everyone sees the group's availability in their own time zone — no math, no spreadsheets.</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">Mono · 12 / 500 · UPPER</div>
+      <div class="sample" style="font-family: var(--cc-font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cc-muted);">GMT+5:30 · IST · Mumbai</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">07</span>Clear space</h2>
+  <p class="sub">Keep a perimeter equal to 20% of the mark's height free of other elements. Use the inner accent square as your unit if you need to eyeball it.</p>
+
+  <div class="panel" style="justify-content: flex-start; align-items: flex-start; padding: 64px;">
+    <svg class="clearspace-svg" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- clearspace box: dashed rule, 20px (≈20%) padding outside a 100×100 mark -->
+      <rect x="20" y="20" width="480" height="180" fill="none" stroke="#c4634a" stroke-width="1" stroke-dasharray="4 6" opacity="0.7"/>
+      <!-- inner content rect for reference -->
+      <rect x="40" y="40" width="440" height="140" fill="none" stroke="#d6cdb9" stroke-width="1"/>
+      <!-- lockup -->
+      <g transform="translate(40 50)">
+        <!-- mark, 100×100 -->
+        <rect x="40" y="40" width="20" height="20" fill="#c4634a"/>
+        <rect x="18" y="18" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+        <rect x="40" y="40" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+        <!-- wordmark -->
+        <text x="124" y="82" font-family="Inter Tight, sans-serif" font-weight="700" font-size="78" letter-spacing="-0.04em" fill="#16140f">calchat</text>
+      </g>
+      <!-- annotation -->
+      <text x="40" y="212" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8273" letter-spacing="0.08em">CLEARSPACE = 0.2 × MARK HEIGHT</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">08</span>Don't</h2>
+  <p class="sub">A handful of failure modes to actively avoid. The brand idea is fragile in only a few specific ways.</p>
+
+  <div class="dont-grid">
+    <div class="dont">
+      <img src="assets/logo-mark.svg" style="height: 80px; transform: rotate(12deg);" alt="">
+      <div class="label"><strong>Don't</strong>Rotate or skew the mark.</div>
+    </div>
+    <div class="dont">
+      <img src="assets/logo-lockup-horizontal.svg" style="height: 56px; transform: scaleX(1.4);" alt="">
+      <div class="label"><strong>Don't</strong>Stretch the lockup.</div>
+    </div>
+    <div class="dont">
+      <svg viewBox="0 0 100 100" width="80" height="80">
+        <rect x="18" y="18" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+        <rect x="40" y="40" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+      </svg>
+      <div class="label"><strong>Don't</strong>Drop the accent intersection — it's the brand.</div>
+    </div>
+    <div class="dont">
+      <svg viewBox="0 0 100 100" width="80" height="80">
+        <rect x="40" y="40" width="20" height="20" fill="#5e8a3a"/>
+        <rect x="18" y="18" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+        <rect x="40" y="40" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"/>
+      </svg>
+      <div class="label"><strong>Don't</strong>Recolor the accent. Terracotta only.</div>
+    </div>
+  </div>
+
+  <footer>
+    <div>CalChat · brand v1.0</div>
+    <div>See README.md for the full asset list and usage notes.</div>
+  </footer>
+
+</body>
+</html>

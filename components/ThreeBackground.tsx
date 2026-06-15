@@ -118,18 +118,19 @@ function TimezoneDials() {
         <group key={i} ref={el => { ringRefs.current[i] = el; }}>
           <line>
             <primitive object={r.circle} attach="geometry" />
-            <lineBasicMaterial color={0x9ae6b4} transparent opacity={0.13 - i * 0.02} />
+            <lineBasicMaterial color={0xd9876d} transparent opacity={0.13 - i * 0.02} />
           </line>
           <lineSegments>
             <primitive object={r.ticks} attach="geometry" />
-            <lineBasicMaterial color={0xbac2d3} transparent opacity={0.22 - i * 0.04} />
+            <lineBasicMaterial color={0xd8d0bf} transparent opacity={0.22 - i * 0.04} />
           </lineSegments>
         </group>
       ))}
-      {/* Alignment heartbeat at the top of the dials */}
+      {/* Alignment heartbeat at the top of the dials — terracotta, per the brand:
+          terracotta is reserved for "moments of overlap". */}
       <lineSegments ref={markerRef}>
         <primitive object={markerGeom} attach="geometry" />
-        <lineBasicMaterial color={0x9ae6b4} transparent opacity={0.3} />
+        <lineBasicMaterial color={0xd9876d} transparent opacity={0.35} />
       </lineSegments>
     </group>
   );
@@ -327,10 +328,10 @@ function FloatingMotes() {
   const mat = useMemo(
     () =>
       new THREE.PointsMaterial({
-        color: 0x90cdf4,
+        color: 0xd8d0bf,
         size: 0.016,
         transparent: true,
-        opacity: 0.32,
+        opacity: 0.28,
         sizeAttenuation: true
       }),
     []
@@ -385,7 +386,7 @@ function ClickRipples() {
           style={{
             left: r.x,
             top: r.y,
-            borderColor: "rgba(154, 230, 180, 0.6)"
+            borderColor: "rgba(217, 135, 109, 0.6)"
           }}
         />
       ))}

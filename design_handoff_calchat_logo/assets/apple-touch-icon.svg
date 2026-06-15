@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="CalChat app icon">
+  <rect width="180" height="180" rx="36" fill="#f4efe6"></rect>
+  <g transform="translate(40 40) scale(1.0)">
+    <rect x="40" y="40" width="20" height="20" fill="#c4634a"></rect>
+    <rect x="18" y="18" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"></rect>
+    <rect x="40" y="40" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"></rect>
+  </g>
+</svg>

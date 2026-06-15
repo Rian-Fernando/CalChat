@@ -8,26 +8,30 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"]
+        sans: ["var(--font-inter-tight)", "ui-sans-serif", "system-ui"],
+        display: ["var(--font-inter-tight)", "ui-sans-serif", "system-ui"],
+        mono: ["var(--font-jetbrains-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"]
       },
       colors: {
+        /* Warm-tinted dark surfaces, derived from the brand's dark-mode tokens.
+           "ink" is the surface family; lower numbers = darker. */
         ink: {
-          950: "#08090c",
-          900: "#0c0e13",
-          800: "#13161d",
-          700: "#1c2029",
-          600: "#262b37",
-          500: "#3a4151",
-          400: "#5a6478",
-          300: "#8a93a6",
-          200: "#bac2d3",
-          100: "#e6eaf2"
+          950: "#0d0b08",
+          900: "#15130e",
+          800: "#1f1c15",
+          700: "#2e2a22",
+          600: "#3b362d",
+          500: "#5a5446",
+          400: "#7a7363",
+          300: "#a39a86",
+          200: "#d8d0bf",
+          100: "#f4efe6"
         },
+        /* Terracotta — the brand's overlap accent. Reserved for "the moment of agreement". */
         accent: {
-          DEFAULT: "#9ae6b4",
-          strong: "#48bb78",
-          soft: "#2f6f4d"
+          DEFAULT: "#d9876d",   // dark-theme terracotta, used for buttons/highlights
+          strong: "#c4634a",    // primary terracotta (full saturation)
+          soft: "#e3a995"       // soft tint for hover states / availability washes
         }
       },
       animation: {

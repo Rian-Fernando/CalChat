@@ -296,10 +296,14 @@ export default function EventPage() {
         {/* Header */}
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <a href="/" className="text-xs uppercase tracking-[0.3em] text-ink-400 hover:text-ink-200">
-              calchat
+            <a href="/" className="inline-flex items-center gap-2 text-ink-400 hover:opacity-80" aria-label="CalChat home">
+              <img
+                src="/brand/logo-lockup-horizontal-light.svg"
+                alt="CalChat"
+                className="h-6 w-auto"
+              />
             </a>
-            <h1 className="mt-1 text-2xl font-medium text-ink-100 sm:text-3xl">{event.title}</h1>
+            <h1 className="mt-2 text-2xl font-medium text-ink-100 sm:text-3xl">{event.title}</h1>
             <p className="text-xs text-ink-500">
               Started planning for the week of{" "}
               <span className="text-ink-300">

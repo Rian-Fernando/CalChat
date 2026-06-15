@@ -127,6 +127,11 @@ export default function AvailabilityGrid({
       className="no-select"
       onTouchMove={onTouchMove}
       onMouseLeave={() => onHoverStartSlot?.(null)}
+      // In edit mode, block the browser's default touch behavior (horizontal/vertical pan,
+      // pinch-zoom) over the grid so a drag-select swipe doesn't get hijacked into a
+      // page scroll. Users can still scroll the page by touching anywhere outside the grid
+      // (header, mode toggle, side panel, sticky save bar).
+      style={mode === "edit" ? { touchAction: "none" } : undefined}
     >
       {/* Header */}
       <div
