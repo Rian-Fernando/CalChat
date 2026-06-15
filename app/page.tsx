@@ -44,8 +44,30 @@ export default function Home() {
     }
   };
 
+  /* WebApplication structured data — helps Google understand what this is */
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "CalChat",
+    url: "https://calchat.rianfernando.com",
+    description:
+      "Share a link, pick your timezone, drag the hours you're free. CalChat finds the overlapping time-of-day across every participant's timezone.",
+    applicationCategory: "ProductivityApplication",
+    operatingSystem: "Web",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    author: {
+      "@type": "Person",
+      name: "Rian Fernando",
+      url: "https://rianfernando.com"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ThreeBackground />
       <main className="above-bg mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
         <div className="animate-fade-in text-center">
@@ -97,8 +119,17 @@ export default function Home() {
           </p>
         </div>
 
-        <footer className="mt-10 text-center text-xs text-ink-500">
-          Free. No sign-up. Built with Next.js + Upstash.
+        <footer className="mt-10 flex flex-col items-center gap-2 text-center text-xs text-ink-500">
+          <p>Free. No sign-up. Built with Next.js + Upstash.</p>
+          <p>
+            <a
+              href="https://rianfernando.com"
+              rel="author"
+              className="text-ink-300 underline-offset-4 transition hover:text-ink-100 hover:underline"
+            >
+              Built by Rian Fernando
+            </a>
+          </p>
         </footer>
       </main>
     </>
