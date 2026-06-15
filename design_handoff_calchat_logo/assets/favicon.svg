@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="CalChat icon">
-  <rect width="32" height="32" rx="6" fill="#f4efe6"></rect>
-  
-  <rect x="14" y="14" width="4" height="4" fill="#c4634a"></rect>
-  <rect x="6" y="6" width="12" height="12" fill="none" stroke="#16140f" stroke-width="2"></rect>
-  <rect x="14" y="14" width="12" height="12" fill="none" stroke="#16140f" stroke-width="2"></rect>
-</svg>

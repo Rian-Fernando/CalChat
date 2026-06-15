@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 227 206" role="img" aria-label="CalChat">
-  <g transform="translate(53.5 0) scale(1.2)"><rect x="40" y="40" width="20" height="20" fill="#16140f"></rect>
-  <rect x="18" y="18" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"></rect>
-  <rect x="40" y="40" width="42" height="42" fill="none" stroke="#16140f" stroke-width="4"></rect></g>
-  <text x="0" y="194" font-family="Inter Tight, system-ui, -apple-system, Segoe UI, sans-serif" font-weight="700" font-size="64" letter-spacing="-0.04em" fill="#16140f">calchat</text>
-</svg>
