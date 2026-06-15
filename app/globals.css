@@ -80,3 +80,25 @@ select:focus-visible {
     min-height: 22px;
   }
 }
+
+/* Background click ripples — soft expanding rings */
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.55;
+    transform: translate(-50%, -50%);
+  }
+  60% {
+    opacity: 0.32;
+  }
+  100% {
+    width: 380px;
+    height: 380px;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+.animate-ripple {
+  animation: ripple 1.3s ease-out forwards;
+}
