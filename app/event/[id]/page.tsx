@@ -526,11 +526,41 @@ export default function EventPage() {
           </aside>
         </div>
 
-        <footer className="mt-10 text-center text-xs text-ink-500">
+        <footer className="mt-10 pb-24 text-center text-xs text-ink-500 sm:pb-0">
           Times are stored as UTC under the hood — every friend&apos;s timezone is normalized
           before computing overlap.
         </footer>
       </main>
+
+      {/* Sticky bottom Save bar — phones only, edit mode only. Keeps Save reachable
+          after dragging through the long grid so users don't have to scroll up. */}
+      {mode === "edit" && participantId && (
+        <div className="above-bg fixed bottom-0 left-0 right-0 z-30 border-t border-ink-700 bg-ink-950/95 px-4 py-3 backdrop-blur-lg sm:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-ink-300">
+              {selected.size > 0 ? (
+                <>
+                  <span className="text-ink-100">{selected.size * 15}</span> min selected
+                </>
+              ) : (
+                "Drag the grid to mark times"
+              )}
+            </span>
+            <div className="flex items-center gap-2">
+              {savedAt && !saving && (
+                <span className="text-[11px] text-accent">Saved</span>
+              )}
+              <button
+                onClick={saveAvailability}
+                disabled={saving}
+                className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-ink-950 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

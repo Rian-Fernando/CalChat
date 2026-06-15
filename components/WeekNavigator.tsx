@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { DateTime } from "luxon";
 import { currentWeekMondayISO } from "@/lib/timezone";
+import DatePicker from "./DatePicker";
 
 interface Props {
   /** Monday of the currently displayed week, as YYYY-MM-DD. */
@@ -15,13 +16,12 @@ interface Props {
 function mondayOf(isoDate: string): string {
   const dt = DateTime.fromISO(isoDate);
   if (!dt.isValid) return isoDate;
-  // Luxon weekday: 1 (Mon) .. 7 (Sun) — snap any picked date back to its Monday.
+  // Luxon weekday: 1 (Mon) .. 7 (Sun). Snap any picked date back to its Monday.
   return dt.minus({ days: dt.weekday - 1 }).toFormat("yyyy-LL-dd");
 }
 
 export default function WeekNavigator({ value, onChange, timezone }: Props) {
-  const dateInputRef = useRef<HTMLInputElement>(null);
-  const [picking, setPicking] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const monday = DateTime.fromISO(value);
   const sunday = monday.plus({ days: 6 });
@@ -36,8 +36,6 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
     : `${monday.toFormat("LLL d, yyyy")} – ${sunday.toFormat("LLL d, yyyy")}`;
 
   const shift = (days: number) => onChange(monday.plus({ days }).toFormat("yyyy-LL-dd"));
-  const today = () => onChange(currentWeekMondayISO(timezone));
-
   const isThisWeek = value === currentWeekMondayISO(timezone);
 
   return (
@@ -62,33 +60,25 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
           ‹ Prev
         </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            setPicking(true);
-            // open the native date picker
-            requestAnimationFrame(() => dateInputRef.current?.showPicker?.());
-          }}
-          className="ml-1 rounded-md border border-ink-600 bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
-          title="Pick any week (month + year navigation in the picker)"
-        >
-          {label}
-        </button>
-        {/* Hidden native picker — gives us month + year navigation for free,
-            and works correctly on mobile (iOS / Android) by default. */}
-        <input
-          ref={dateInputRef}
-          type="date"
-          value={value}
-          onChange={e => {
-            setPicking(false);
-            if (e.target.value) onChange(mondayOf(e.target.value));
-          }}
-          onBlur={() => setPicking(false)}
-          className="absolute h-0 w-0 opacity-0"
-          aria-hidden={!picking}
-          tabIndex={-1}
-        />
+        {/* Date label opens the custom dark-theme picker */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setPickerOpen(o => !o)}
+            className="ml-1 rounded-md border border-ink-600 bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
+            title="Pick any week — full month + year navigation inside"
+            aria-haspopup="dialog"
+            aria-expanded={pickerOpen}
+          >
+            {label}
+          </button>
+          <DatePicker
+            open={pickerOpen}
+            value={value}
+            onChange={iso => onChange(mondayOf(iso))}
+            onClose={() => setPickerOpen(false)}
+          />
+        </div>
 
         <button
           type="button"
@@ -113,7 +103,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
       {!isThisWeek && (
         <button
           type="button"
-          onClick={today}
+          onClick={() => onChange(currentWeekMondayISO(timezone))}
           className="rounded-md bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/30"
           title="Jump back to this week"
         >

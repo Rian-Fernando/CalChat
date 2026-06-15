@@ -6,6 +6,7 @@ import { computeOverlapRegions } from "@/lib/overlap";
 import { SLOT_MS } from "@/lib/timezone";
 import TimezonePicker from "./TimezonePicker";
 import ParticipantFilter from "./ParticipantFilter";
+import WeeklyPatternHeatmap from "./WeeklyPatternHeatmap";
 import type { Participant } from "@/lib/types";
 
 interface Props {
@@ -338,6 +339,13 @@ export default function CommonTimesCalendar({
           )}
         </div>
       )}
+
+      {/* Recurring sweet-spots heatmap — aggregated across every week with data */}
+      <WeeklyPatternHeatmap
+        participants={filteredParticipants}
+        viewerTimezone={viewerTimezone}
+        onJumpToWeek={onJumpToWeek}
+      />
     </div>
   );
 }

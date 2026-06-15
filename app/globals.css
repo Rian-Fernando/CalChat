@@ -48,10 +48,18 @@ body::before {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 .card {
-  background: rgba(19, 22, 29, 0.72);
-  border: 1px solid rgba(58, 65, 81, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(12, 14, 19, 0.86);
+  border: 1px solid rgba(58, 65, 81, 0.7);
+  backdrop-filter: blur(14px) saturate(110%);
+  -webkit-backdrop-filter: blur(14px) saturate(110%);
+}
+
+/* Slightly more solid backdrop for any free-floating panels that contain text */
+.panel-solid {
+  background: rgba(12, 14, 19, 0.92);
+  border: 1px solid rgba(58, 65, 81, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 button:focus-visible,

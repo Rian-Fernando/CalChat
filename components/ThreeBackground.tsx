@@ -80,7 +80,7 @@ function Globe() {
         color: 0xbac2d3,
         size: 0.028,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.55,
         sizeAttenuation: true
       }),
     []
@@ -224,7 +224,7 @@ function FloatingMotes() {
         color: 0x90cdf4,
         size: 0.018,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.38,
         sizeAttenuation: true
       }),
     []
@@ -258,7 +258,7 @@ function LissajousSwarm() {
         color: 0xd6bcfa,
         size: 0.022,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.38,
         sizeAttenuation: true
       }),
     []

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DateTime } from "luxon";
 import { buildWeekGrid } from "@/lib/timezone";
 
 interface Props {
@@ -21,10 +22,21 @@ function cellLabel(cellIdx: number): string {
   return `${h12}:${mm} ${period}`;
 }
 
+const REPEAT_OPTIONS: { value: number; label: string }[] = [
+  { value: 1, label: "Just this week" },
+  { value: 2, label: "Next 2 weeks" },
+  { value: 4, label: "Next 4 weeks" },
+  { value: 8, label: "Next 8 weeks" },
+  { value: 12, label: "Next 12 weeks" },
+  { value: 26, label: "Next ~6 months (26 weeks)" },
+  { value: 52, label: "Next year (52 weeks)" }
+];
+
 export default function QuickAdd({ weekStartDate, timezone, selected, onChange }: Props) {
   const [days, setDays] = useState<Set<number>>(new Set());
   const [startCell, setStartCell] = useState(18); // 9:00 AM
   const [endCell, setEndCell] = useState(34);     // 5:00 PM
+  const [repeatWeeks, setRepeatWeeks] = useState(1);
   const [expanded, setExpanded] = useState(false);
 
   const grid = useMemo(() => buildWeekGrid(weekStartDate, timezone), [weekStartDate, timezone]);
@@ -51,15 +63,24 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
   const apply = (op: "add" | "remove") => {
     if (days.size === 0 || endCell <= startCell) return;
     const next = new Set(selected);
-    for (const dayIdx of days) {
-      const day = grid[dayIdx];
-      if (!day) continue;
-      for (let c = startCell; c < endCell; c++) {
-        const cell = day.cells[c];
-        if (!cell) continue;
-        for (const s of cell.slots) {
-          if (op === "add") next.add(s);
-          else next.delete(s);
+    // Apply the same day-range + time-range across `repeatWeeks` consecutive weeks
+    // starting with the displayed week. Each iteration rebuilds the grid for that week
+    // so the slot indices are correctly anchored to absolute UTC time.
+    for (let w = 0; w < repeatWeeks; w++) {
+      const thisWeekStart = DateTime.fromISO(weekStartDate)
+        .plus({ weeks: w })
+        .toFormat("yyyy-LL-dd");
+      const weekGrid = w === 0 ? grid : buildWeekGrid(thisWeekStart, timezone);
+      for (const dayIdx of days) {
+        const day = weekGrid[dayIdx];
+        if (!day) continue;
+        for (let c = startCell; c < endCell; c++) {
+          const cell = day.cells[c];
+          if (!cell) continue;
+          for (const s of cell.slots) {
+            if (op === "add") next.add(s);
+            else next.delete(s);
+          }
         }
       }
     }
@@ -146,13 +167,32 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
             </div>
           </div>
 
+          {/* Repeat */}
+          <div>
+            <div className="mb-1.5 text-[11px] uppercase tracking-wider text-ink-400">
+              Repeat
+            </div>
+            <select
+              value={repeatWeeks}
+              onChange={e => setRepeatWeeks(Number(e.target.value))}
+              className="w-full rounded-md border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
+              title="Apply the same days + time range to multiple consecutive weeks"
+            >
+              {REPEAT_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Actions */}
           <div className="flex items-center justify-between gap-2 pt-1">
             <span className="text-[11px] text-ink-500">
               {canApply
                 ? `${days.size} day${days.size === 1 ? "" : "s"} · ${
                     (endCell - startCell) * 30
-                  } min each`
+                  } min · ${repeatWeeks} week${repeatWeeks === 1 ? "" : "s"}`
                 : "Pick at least one day"}
             </span>
             <div className="flex gap-2">
