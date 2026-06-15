@@ -1,4 +1,12 @@
+<p align="center">
+  <a href="https://calchat.rianfernando.com">
+    <img src=".github/cover.png" alt="CalChat — find a call time across timezones" width="720" />
+  </a>
+</p>
+
 # CalChat
+
+**Live: [calchat.rianfernando.com](https://calchat.rianfernando.com)** &nbsp;·&nbsp; Built by [Rian Fernando](https://rianfernando.com)
 
 A minimalist, shareable, timezone-aware availability picker. Create a link, send it to your
 friends across the world, and find the hours when you're all free at the same time.
