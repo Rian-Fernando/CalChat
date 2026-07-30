@@ -21,8 +21,15 @@ const config: Config = {
           800: "#1f1c15",
           700: "#2e2a22",
           600: "#3b362d",
-          500: "#5a5446",
-          400: "#7a7363",
+          /* 500/400/300 are the muted *text* tiers (they're never used as fills;
+             only as type and hover borders). Measured against the #15130e
+             surface they now land at 4.5:1, 5.6:1 and 6.7:1, so all three clear
+             WCAG AA for body text — the old 500 (#5a5446) sat at 2.5:1 and the
+             old 400 (#7a7363) at 4.0:1, which failed on the small labels and
+             timestamps they're mostly used for. Hue is unchanged; the tiers are
+             still visibly stepped. */
+          500: "#837c6b",
+          400: "#948c7a",
           300: "#a39a86",
           200: "#d8d0bf",
           100: "#f4efe6"

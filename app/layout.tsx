@@ -26,7 +26,12 @@ export const metadata: Metadata = {
      resolve to the production domain instead of a *.vercel.app preview host —
      keeps Google from indexing duplicate URLs. */
   metadataBase: new URL(SITE_URL),
-  title: SITE_TITLE,
+  /* `template` gives every nested route a unique, self-describing <title>
+     without each one having to repeat the brand. */
+  title: {
+    default: SITE_TITLE,
+    template: "%s — CalChat"
+  },
   description: SITE_DESCRIPTION,
   applicationName: "CalChat",
   authors: [{ name: "Rian Fernando", url: "https://rianfernando.com" }],
@@ -35,10 +40,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/"
   },
-  icons: {
-    icon: [{ url: "/brand/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/brand/apple-touch-icon.svg" }]
-  },
+  /* Icons come from the file conventions — app/icon.svg and app/apple-icon.tsx.
+     Declaring `icons` here as well would shadow them, and the apple icon in
+     particular has to be the generated PNG: iOS Safari can't decode an SVG
+     apple-touch-icon and silently falls back to a screenshot of the page. */
   openGraph: {
     type: "website",
     locale: "en_US",

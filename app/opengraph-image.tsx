@@ -1,8 +1,12 @@
 import { ImageResponse } from "next/og";
 
-// Edge runtime keeps cold-start cost down. ImageResponse outputs PNG natively
-// (Satori under the hood) — social platforms reject SVG previews.
-export const runtime = "edge";
+// ImageResponse outputs PNG natively (Satori under the hood) — social platforms
+// and AI crawlers both reject SVG previews.
+//
+// Deliberately NOT `runtime = "edge"`: the edge runtime opts a route out of
+// static generation, so the card would be rendered per request. On the default
+// runtime Next bakes it at build time and serves it as a static asset, which is
+// what a social scraper or crawler wants — no cold start, no failure mode.
 export const alt = "CalChat — find a call time across timezones";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
