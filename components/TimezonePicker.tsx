@@ -34,7 +34,7 @@ export default function TimezonePicker({ value, onChange, compact = false }: Pro
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-ink-600 bg-ink-900/70 text-left transition hover:border-ink-500 ${
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-control bg-ink-900/70 text-left transition hover:border-ink-500 ${
           compact ? "px-3 py-2 text-sm" : "px-4 py-3"
         }`}
       >
@@ -62,7 +62,7 @@ export default function TimezonePicker({ value, onChange, compact = false }: Pro
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search city or zone..."
-              className="w-full border-b border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-100 placeholder:text-ink-500 outline-none"
+              className="w-full border-b border-control bg-ink-900 px-4 py-3 text-sm text-ink-100 placeholder:text-ink-500 outline-none"
             />
             <ul className="no-scrollbar max-h-72 overflow-y-auto">
               {filtered.length === 0 && (

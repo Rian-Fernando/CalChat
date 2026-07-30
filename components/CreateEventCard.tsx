@@ -71,9 +71,9 @@ export default function CreateEventCard() {
           if (e.key === "Enter" && !creating) handleCreate();
         }}
         placeholder="e.g. Catch-up with the group"
-        /* ink-500 rather than ink-600 on the boundary: WCAG 1.4.11 wants 3:1 for
-           the edge of a form control, and ink-600 on this surface is 1.6:1. */
-        className="w-full rounded-lg border border-ink-500 bg-ink-900/70 px-4 py-3 text-ink-100 placeholder:text-ink-400 transition focus:border-accent"
+        /* border-control, not the ink scale: WCAG 1.4.11 wants 3:1 for the edge
+           of a form control, and ink-600 on this surface is 1.6:1. */
+        className="w-full rounded-lg border border-control bg-ink-900/70 px-4 py-3 text-ink-100 placeholder:text-ink-400 transition focus:border-accent"
         maxLength={120}
       />
 

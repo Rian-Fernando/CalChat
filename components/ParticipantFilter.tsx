@@ -58,7 +58,7 @@ export default function ParticipantFilter({
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-900 px-3 py-1.5 text-left text-xs text-ink-200 transition hover:border-ink-500"
+        className="flex w-full items-center justify-between gap-2 rounded-md border border-control bg-ink-900 px-3 py-1.5 text-left text-xs text-ink-200 transition hover:border-ink-500"
       >
         <span className="truncate">
           <span className="text-ink-400">Find common times with:</span>{" "}

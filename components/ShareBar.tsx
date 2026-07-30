@@ -16,7 +16,7 @@ export default function ShareBar({ url }: { url: string }) {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-900/60 p-1.5 pl-3">
+    <div className="flex items-center gap-2 rounded-lg border border-control bg-ink-900/60 p-1.5 pl-3">
       <span className="text-xs uppercase tracking-wider text-ink-400">Share</span>
       <input
         readOnly

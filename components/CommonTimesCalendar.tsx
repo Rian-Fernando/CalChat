@@ -191,7 +191,7 @@ export default function CommonTimesCalendar({
           <select
             value={minDuration}
             onChange={e => setMinDuration(Number(e.target.value))}
-            className="rounded-md border border-ink-700 bg-ink-900 px-2 py-1 text-ink-100"
+            className="rounded-md border border-control bg-ink-900 px-2 py-1 text-ink-100"
           >
             <option value={15}>any (15+)</option>
             <option value={30}>30 min+</option>
@@ -306,7 +306,7 @@ export default function CommonTimesCalendar({
                   <button
                     type="button"
                     onClick={() => onJumpToWeek(w.monday)}
-                    className="flex w-full items-center justify-between gap-3 rounded-md border border-ink-700 bg-ink-900/60 px-3 py-2 text-left text-xs transition hover:border-accent/40 hover:bg-ink-800"
+                    className="flex w-full items-center justify-between gap-3 rounded-md border border-control bg-ink-900/60 px-3 py-2 text-left text-xs transition hover:border-accent/40 hover:bg-ink-800"
                   >
                     <span className="text-ink-100">
                       Week of{" "}

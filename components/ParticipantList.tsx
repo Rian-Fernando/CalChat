@@ -55,7 +55,7 @@ export default function ParticipantList({ participants, currentId, onClaim }: Pr
                     onClaim(p.id);
                   }
                 }}
-                className="self-start rounded border border-ink-700 px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-300 transition hover:border-accent hover:text-accent"
+                className="self-start rounded border border-control px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-300 transition hover:border-accent hover:text-accent"
               >
                 this is me
               </button>

@@ -297,10 +297,19 @@ export default function EventPage() {
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <a href="/" className="inline-flex items-center gap-2 text-ink-400 hover:opacity-80" aria-label="CalChat home">
+              {/* eslint-disable-next-line @next/next/no-img-element --
+                  next/image doesn't optimize SVG; it would ship a wrapper and
+                  extra runtime for a file it passes through untouched. Plain
+                  <img> with intrinsic dimensions is the cheaper, equivalent
+                  thing here. alt is empty because the anchor already carries
+                  the accessible name. */}
               <img
                 src="/brand/logo-lockup-horizontal-light.svg"
-                alt="CalChat"
+                alt=""
+                width={96}
+                height={24}
                 className="h-6 w-auto"
+                decoding="async"
               />
             </a>
             <h1 className="mt-2 text-2xl font-medium text-ink-100 sm:text-3xl">{event.title}</h1>
@@ -342,7 +351,7 @@ export default function EventPage() {
 
         {/* Mode toggle */}
         <div className="mb-5 flex items-center gap-2">
-          <div className="inline-flex rounded-lg border border-ink-700 bg-ink-900/60 p-1">
+          <div className="inline-flex rounded-lg border border-control bg-ink-900/60 p-1">
             <button
               onClick={() => setMode("edit")}
               className={`rounded-md px-4 py-1.5 text-sm transition ${
@@ -382,7 +391,7 @@ export default function EventPage() {
             )}
             <button
               onClick={() => refetch()}
-              className="rounded-md border border-ink-700 px-3 py-1.5 text-xs text-ink-300 hover:text-ink-100"
+              className="rounded-md border border-control px-3 py-1.5 text-xs text-ink-300 hover:text-ink-100"
               title="Pull latest from your friends right now"
             >
               Refresh

@@ -197,6 +197,9 @@ export default function Home() {
       <header className="above-bg mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5">
         {/* Explicit width + height: the lockup is 401x100, and reserving the box
             keeps the header from reflowing when the SVG lands. */}
+        {/* eslint-disable-next-line @next/next/no-img-element --
+            next/image doesn't optimize SVG; it would ship a wrapper and extra
+            runtime for a file it passes through untouched. */}
         <img
           src="/brand/logo-lockup-horizontal-light.svg"
           alt="CalChat"

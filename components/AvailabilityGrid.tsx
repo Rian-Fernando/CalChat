@@ -91,9 +91,18 @@ export default function AvailabilityGrid({
     }
   };
 
+  /* The pointerup listener is attached once per mode change, but endDrag closes
+     over the `onChange` prop through commit(). Calling through a ref keeps the
+     listener identity stable while always invoking the current handler — today
+     the parent passes a stable setState, so nothing is broken, but an inline
+     handler would otherwise leave the window listener committing through a
+     stale closure and silently dropping the end of a drag. */
+  const endDragRef = useRef(endDrag);
+  endDragRef.current = endDrag;
+
   useEffect(() => {
     if (mode !== "edit") return;
-    const onUp = () => endDrag();
+    const onUp = () => endDragRef.current();
     window.addEventListener("pointerup", onUp);
     return () => window.removeEventListener("pointerup", onUp);
   }, [mode]);

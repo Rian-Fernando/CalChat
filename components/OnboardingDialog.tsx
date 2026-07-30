@@ -47,7 +47,7 @@ export default function OnboardingDialog({
                   key={p.id}
                   type="button"
                   onClick={() => onClaim(p.id)}
-                  className="flex items-center gap-1.5 rounded-full border border-ink-600 bg-ink-800 px-3 py-1.5 text-xs text-ink-100 transition hover:border-accent hover:bg-ink-700"
+                  className="flex items-center gap-1.5 rounded-full border border-control bg-ink-800 px-3 py-1.5 text-xs text-ink-100 transition hover:border-accent hover:bg-ink-700"
                   title={`Continue editing ${p.name}'s entry on this device`}
                 >
                   <span
@@ -75,7 +75,7 @@ export default function OnboardingDialog({
             if (e.key === "Enter" && canSubmit) onSubmit(name.trim(), zone, color);
           }}
           placeholder="e.g. Rian"
-          className="mb-5 w-full rounded-lg border border-ink-600 bg-ink-900/70 px-4 py-3 text-ink-100 placeholder:text-ink-500 transition focus:border-accent"
+          className="mb-5 w-full rounded-lg border border-control bg-ink-900/70 px-4 py-3 text-ink-100 placeholder:text-ink-500 transition focus:border-accent"
           maxLength={40}
         />
 

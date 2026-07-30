@@ -116,7 +116,7 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
                     className={`rounded-md border px-2.5 py-1 text-xs transition ${
                       active
                         ? "border-accent bg-accent/20 text-ink-100"
-                        : "border-ink-700 bg-ink-800/60 text-ink-300 hover:border-ink-500"
+                        : "border-control bg-ink-800/60 text-ink-300 hover:border-ink-500"
                     }`}
                   >
                     <span className="font-medium">{day.date.toFormat("EEE")}</span>
@@ -140,7 +140,7 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
                   setStartCell(v);
                   if (endCell <= v) setEndCell(Math.min(48, v + 2));
                 }}
-                className="w-full rounded-md border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
+                className="w-full rounded-md border border-control bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
               >
                 {startOptions.map(o => (
                   <option key={o.value} value={o.value}>
@@ -154,7 +154,7 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
               <select
                 value={endCell}
                 onChange={e => setEndCell(Number(e.target.value))}
-                className="w-full rounded-md border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
+                className="w-full rounded-md border border-control bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
               >
                 {endOptions
                   .filter(o => o.value > startCell)
@@ -175,7 +175,7 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
             <select
               value={repeatWeeks}
               onChange={e => setRepeatWeeks(Number(e.target.value))}
-              className="w-full rounded-md border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
+              className="w-full rounded-md border border-control bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
               title="Apply the same days + time range to multiple consecutive weeks"
             >
               {REPEAT_OPTIONS.map(o => (
@@ -200,7 +200,7 @@ export default function QuickAdd({ weekStartDate, timezone, selected, onChange }
                 type="button"
                 onClick={() => apply("remove")}
                 disabled={!canApply}
-                className="rounded-md border border-ink-700 px-3 py-1.5 text-xs text-ink-300 transition hover:text-ink-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-md border border-control px-3 py-1.5 text-xs text-ink-300 transition hover:text-ink-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Remove
               </button>

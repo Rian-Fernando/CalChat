@@ -73,7 +73,7 @@ export default function NotesBoard({ participants, currentId, onSaveMyNote }: Pr
             onChange={e => setDraft(e.target.value.slice(0, MAX_NOTE))}
             placeholder="e.g. quick catch-up, ~30 min should do it. let's use Zoom"
             rows={3}
-            className="w-full resize-y rounded-md border border-ink-700 bg-ink-900/60 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-500 outline-none focus:border-ink-500"
+            className="w-full resize-y rounded-md border border-control bg-ink-900/60 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-500 outline-none focus:border-ink-500"
           />
           <div className="mt-2 flex items-center justify-between gap-2">
             <span className="text-[11px] text-ink-500">

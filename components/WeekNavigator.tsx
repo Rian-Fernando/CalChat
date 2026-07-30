@@ -45,7 +45,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
         <button
           type="button"
           onClick={() => shift(-28)}
-          className="rounded-md border border-ink-700 px-2 py-1.5 text-[11px] text-ink-300 transition hover:bg-ink-800 hover:text-ink-100"
+          className="rounded-md border border-control px-2 py-1.5 text-[11px] text-ink-300 transition hover:bg-ink-800 hover:text-ink-100"
           title="Jump back ~1 month"
           aria-label="Previous month"
         >
@@ -54,7 +54,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
         <button
           type="button"
           onClick={() => shift(-7)}
-          className="rounded-md border border-ink-700 px-2 py-1.5 text-xs text-ink-200 transition hover:bg-ink-800 hover:text-ink-100"
+          className="rounded-md border border-control px-2 py-1.5 text-xs text-ink-200 transition hover:bg-ink-800 hover:text-ink-100"
           title="Previous week"
           aria-label="Previous week"
         >
@@ -67,7 +67,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
           ref={triggerRef}
           type="button"
           onClick={() => setPickerOpen(o => !o)}
-          className="ml-1 rounded-md border border-ink-600 bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
+          className="ml-1 rounded-md border border-control bg-ink-900/60 px-3 py-1.5 text-sm font-medium text-ink-100 transition hover:border-ink-500"
           title="Pick any week — full month + year navigation inside"
           aria-haspopup="dialog"
           aria-expanded={pickerOpen}
@@ -85,7 +85,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
         <button
           type="button"
           onClick={() => shift(7)}
-          className="rounded-md border border-ink-700 px-2 py-1.5 text-xs text-ink-200 transition hover:bg-ink-800 hover:text-ink-100"
+          className="rounded-md border border-control px-2 py-1.5 text-xs text-ink-200 transition hover:bg-ink-800 hover:text-ink-100"
           title="Next week"
           aria-label="Next week"
         >
@@ -94,7 +94,7 @@ export default function WeekNavigator({ value, onChange, timezone }: Props) {
         <button
           type="button"
           onClick={() => shift(28)}
-          className="rounded-md border border-ink-700 px-2 py-1.5 text-[11px] text-ink-300 transition hover:bg-ink-800 hover:text-ink-100"
+          className="rounded-md border border-control px-2 py-1.5 text-[11px] text-ink-300 transition hover:bg-ink-800 hover:text-ink-100"
           title="Jump forward ~1 month"
           aria-label="Next month"
         >
