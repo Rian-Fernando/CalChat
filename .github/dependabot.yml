@@ -1,0 +1,39 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+    labels:
+      - dependencies
+    ignore:
+      # These majors are deliberate migrations, not automated bumps:
+      #  - React 19 needs react + react-dom upgraded together, and @react-three/fiber
+      #    v8 targets React 18 — moving to 19 means moving to fiber v9 as well.
+      #  - Next 15 changes params/searchParams to Promises in the App Router,
+      #    which touches every route in app/.
+      #  - three ships breaking renames on minor bumps and is pinned to the
+      #    @types/three and drei versions the scene is built against.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "three"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@react-three/fiber"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@react-three/drei"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies

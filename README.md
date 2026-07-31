@@ -1,215 +1,153 @@
-<p align="center">
-  <a href="https://calchat.rianfernando.com">
-    <img src=".github/cover.png" alt="CalChat — find a call time across timezones" width="720" />
-  </a>
-</p>
+# CalChat — availability across timezones
 
-# CalChat
+A shareable availability planner for groups scattered across the world. One person creates a
+link, everyone drags the hours they're free **in their own timezone**, and CalChat shows the
+overlap — **stored as absolute UTC slots, never wall-clock time**, so daylight saving,
+half-hour offsets and dates that cross midnight all resolve without special cases.
 
-**Live: [calchat.rianfernando.com](https://calchat.rianfernando.com)** &nbsp;·&nbsp; Built by [Rian Fernando](https://rianfernando.com)
+[![CI](https://github.com/Rian-Fernando/CalChat/actions/workflows/ci.yml/badge.svg)](https://github.com/Rian-Fernando/CalChat/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Rian-Fernando/CalChat/actions/workflows/codeql.yml/badge.svg)](https://github.com/Rian-Fernando/CalChat/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Accounts required: 0](https://img.shields.io/badge/accounts-0%20required-3ddc97)](#why-its-different)
+[![Live](https://img.shields.io/badge/live-calchat.rianfernando.com-4cc9f0)](https://calchat.rianfernando.com)
 
-A shareable, timezone-aware availability planner. Create a link, send it to your friends
-across the world, and find the hours when you're all free — at any week from now through
-next year. Optimised for friend-group casual scheduling: no sign-up, no calendar import,
-no integration with anything. Just a name and a colour.
+**▶ Live: [calchat.rianfernando.com](https://calchat.rianfernando.com)** · [Project write-up](https://rianfernando.com/projects/calchat) · [llms.txt](https://calchat.rianfernando.com/llms.txt)
 
----
+![CalChat](.github/cover.png)
+
+## Why it's different
+
+Most group schedulers either ask you to pick from someone else's proposed slots, or want to
+read your calendar. CalChat asks one question — **which hours are you actually willing to be
+on a call** — which is usually a much shorter list than the hours a calendar says are
+technically free. No sign-up, no OAuth, no calendar import, nothing to install.
+
+The design decision everything else follows from: availability is **never stored as a
+wall-clock time**. Every free block is an integer UTC 15-minute slot index, so finding what a
+group has in common is set intersection on integers. Three people who each think they picked
+a different day of the week can still be told they share a 60-minute window, and each of them
+sees it rendered in their own local time.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Browser["Browser · React + three.js"]
+    G["Availability grid<br/>7 days × 30-min cells"]
+    V["Overlap views<br/>heatmap · calendar · recurring sweet spots"]
+    S["Scroll-driven scene<br/>React Three Fiber"]
+  end
+  subgraph Server["Next.js App Router · Vercel"]
+    API["/api/events<br/>create · fetch · upsert participant"]
+    SEO["Metadata routes<br/>sitemap · robots · llms.txt · OG card"]
+  end
+  D[("Upstash Redis<br/>event → participants → slot sets")]
+  AI["Search and answer engines"]
+
+  G -->|"UTC 15-min slot integers"| API
+  API --> D
+  D --> API
+  API -->|"set intersection"| V
+  SEO --> AI
+```
+
+Everything the group interacts with is client-side; the server does three things only — mint
+an event, read one, and upsert a participant. There are no accounts to authenticate, so the
+event id *is* the credential, and identity is a nanoid held in `localStorage`.
 
 ## What it does
 
-### Picking your availability
-
-- **Drag-select** on a 7-day × 30-min cell grid. Each cell is 30 minutes so you can start
-  on the hour *or* the half-hour (matters for friends in `Asia/Kolkata`, `Asia/Kathmandu`,
-  `Australia/Adelaide`, etc.).
-- **Quick-add** a day-range + time-range in one click, optionally **repeating across up to
-  52 consecutive weeks** for "my Tuesdays 6–8 PM are always free" templates.
-- **Personal note** per participant, attributed and editable only by you, visible to
-  everyone.
-- Pick one of **22 distinct rainbow colours** for your selections — the server enforces
-  uniqueness, so two people can never share a colour.
-
-### Discovering overlap
-
-Three view modes, all in your own timezone (each visitor picks theirs independently):
-
-- **Group overlap** — heatmap. Every cell is split into vertical stripes, one per
-  participant in their colour. Filled stripe = that person is free; dim = busy.
-  A green glow border highlights cells where everyone agrees.
-- **Common times** — week-grid calendar with overlap **blocks positioned at their real
-  times**, sized by duration. Filter by participant ("show times Rian + Wei share, ignoring
-  Niharika"). Includes an *Overlaps in other weeks* panel and a **Recurring sweet-spots
-  heatmap** that aggregates across all weeks to surface "Tuesday evenings work nearly every
-  week."
-- **My availability** — edit mode for your own selections.
-
-### Multi-week navigation
-
-Same link covers any week. Prev/next week, prev/next month, a custom date picker for jumps,
-and a *Today* shortcut. Availability lives as absolute UTC slot indices so selections in
-different weeks coexist in the same store and DST/half-hour-offset zones all align exactly.
-
-### Multi-device + live updates
-
-Click *"this is me"* on any participant chip to claim that entry on a new device — no
-account, all browser-side. View mode auto-refreshes every 5 minutes while the tab's visible.
-
-### The animated scene
-
-Three.js background built with [React Three Fiber](https://r3f.docs.pmnd.rs/):
-
-- Three concentric **timezone-dial rings** rotating against each other at different speeds,
-  each marked with 24 hour ticks. A vertical heartbeat at the top of the dial softly pulses.
-- **Calendar shards** — 26 translucent rectangular planes drift through 3D space, each in
-  a participant-palette colour. Cursor magnetism gently pulls nearby shards toward your
-  mouse.
-- Every ~14 seconds, four shards drift into a column near the centre, hold briefly,
-  then drift apart — a wordless metaphor for schedules locking in.
-- Click anywhere off the UI to send a soft terracotta ripple.
-
----
-
-## Stack
-
-- **[Next.js 14](https://nextjs.org/)** — App Router, TypeScript, file-based metadata
-- **Tailwind CSS** with a brand-driven palette (warm-dark "ink" surface, terracotta accent
-  reserved for moments of overlap)
-- **[React Three Fiber](https://r3f.docs.pmnd.rs/) + three.js** for the animated scene
-- **[Luxon](https://moment.github.io/luxon/)** for IANA timezone handling — every IANA zone
-  recognised by Node's `Intl.supportedValuesOf('timeZone')` is selectable
-- **[Upstash Redis](https://upstash.com/)** for events (free tier; works directly or via
-  the Vercel marketplace integration)
-- **[Inter Tight](https://fonts.google.com/specimen/Inter+Tight)** + **JetBrains Mono**
-  loaded with `next/font/google` as CSS variables
-- **[next/og](https://nextjs.org/docs/app/api-reference/functions/image-response)** for the
-  1200×630 OG card (renders the brand mark + tagline on the warm-dark surface)
-- **Vercel** for hosting · **Cloudflare** for DNS (subdomain `calchat.rianfernando.com`)
-
----
+- **Drag-select availability** — a 7-day × 30-minute cell grid. Each cell is half an hour so
+  you can start on the hour *or* the half-hour, which matters for `Asia/Kolkata`,
+  `Asia/Kathmandu` and `Australia/Adelaide`.
+- **Quick-add with repeats** — apply a day-range and time-range in one action, optionally
+  repeating across up to **52 consecutive weeks** for "my Tuesdays 6–8 PM are always free".
+- **Group overlap heatmap** — every cell splits into vertical stripes, one per participant in
+  their colour. Filled stripe = free, dim = busy, and a glow border marks total agreement.
+- **Common-times calendar** — overlap blocks positioned at their **real times** and sized by
+  duration, filterable by participant ("what works for Rian + Wei, ignoring Niharika").
+- **Recurring sweet-spots** — a day × hour heatmap aggregated across every week in the event,
+  surfacing "Tuesday evenings work nearly every week".
+- **One link, any week** — the same URL covers every week from now through next year, with
+  prev/next week, month jumps, a date picker and a *Today* shortcut.
+- **22 unique colours** — the server enforces uniqueness, so no two participants can ever
+  share one; that also caps an event at 22 people.
+- **Per-participant notes** — attributed, visible to everyone, editable only by their author.
+- **Multi-device** — click *"this is me"* on any participant chip to claim that entry on
+  another device. No password. View mode re-fetches every 5 minutes while the tab is visible.
 
 ## How the timezone math works
 
 All availability is stored as integer **UTC 15-minute slot indices** —
-`floor(epochMilliseconds / 900_000)`. Every 30-min cell in the grid maps to exactly two
-consecutive slots; overlap is set intersection on the slot integers.
+`floor(epochMilliseconds / 900000)`. 15 minutes is the finest granularity any real-world IANA
+zone uses (Nepal's UTC+5:45 is the worst offender), so every zone lands exactly on the grid.
+Each 30-minute cell maps to exactly two consecutive slots, and overlap is set intersection.
 
-15 minutes is the finest granularity any real-world IANA zone uses (Nepal's
-UTC+5:45 is the worst offender). So when Rian picks `Mon 8:30 PM` in `America/New_York`,
-Niharika picks `Tue 6:00 AM` in `Asia/Kolkata`, and Wei picks `Tue 8:30 AM` in
-`Asia/Shanghai`, the algorithm reports a **60-minute triple overlap** — each viewer sees
-that same UTC window rendered in their own local time, half-hour offsets and Mon→Tue
-date crossings handled exactly.
+| Participant | Picks | Zone |
+|---|---|---|
+| Rian | Monday 8:30 PM | `America/New_York` |
+| Niharika | Tuesday 6:00 AM | `Asia/Kolkata` |
+| Wei | Tuesday 8:30 AM | `Asia/Shanghai` |
 
----
+Three different days-of-week on three different calendars. CalChat reports a **60-minute
+three-way overlap**, and each viewer sees that same UTC window in their own local time —
+half-hour offsets and Mon→Tue date crossings handled exactly, with no per-zone branching.
 
-## Quick start (local)
+## Stack
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Framework | [Next.js 14](https://nextjs.org/) | App Router, TypeScript, file-based metadata |
+| Styling | Tailwind CSS | warm-dark "ink" surface; terracotta reserved for moments of overlap |
+| 3D | [React Three Fiber](https://r3f.docs.pmnd.rs/) + three.js | scroll-driven scene, honours `prefers-reduced-motion` |
+| Time | [Luxon](https://moment.github.io/luxon/) | every zone in `Intl.supportedValuesOf('timeZone')` is selectable |
+| Store | [Upstash Redis](https://upstash.com/) | free tier; in-memory fallback when unconfigured |
+| Social card | [next/og](https://nextjs.org/docs/app/api-reference/functions/image-response) | 1200×630 PNG generated at build time |
+| Hosting | Vercel · Cloudflare DNS | `calchat.rianfernando.com` |
+
+## Run it
 
 ```bash
 npm install
 cp .env.local.example .env.local   # optional — without it, data is in-memory
-npm run dev
+npm run dev                        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Without env vars, `lib/redis.ts` falls back to an **in-memory store** so you can exercise the
+whole flow locally — data is lost on restart and is per-instance, so it isn't suitable for
+actually sharing a link.
 
-> Without env vars set, `lib/redis.ts` falls back to an **in-memory store** so you can
-> exercise the flow locally — data is lost on restart and is per-instance, so it's not
-> suitable for sharing.
+For a real deployment, create an Upstash Redis database (directly, or via Vercel's
+**Storage → Create Database → Upstash for Redis**) and set `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN`. `lib/redis.ts` recognises several common env-var prefixes — see
+the `pickEnv(...)` chain — so the Vercel marketplace integration works whatever it named
+them. `/api/health` does a live SET+GET round-trip and reports `connected` or
+`in-memory fallback`.
 
----
-
-## Deploying your own copy
-
-### Database — Upstash via Vercel marketplace (recommended)
-
-After your first Vercel deploy, on your project page go to **Storage → Create Database →
-Upstash for Redis (KV)**, pick a region close to your users, free tier, then **Connect to
-Project**. Vercel injects the env vars automatically.
-
-The marketplace integration creates variables like `UPSTASH_REDIS_REST_KV_REST_API_URL`
-(prefix + Vercel's standard suffix). `lib/redis.ts` recognises these along with several
-other common names — see the `pickEnv(...)` chain — so it works regardless of which
-prefix you typed during setup.
-
-### Database — direct Upstash signup
-
-1. Sign up at [upstash.com](https://upstash.com) and create a Redis database.
-2. Copy the **REST URL** and **REST Token**.
-3. Drop them in `.env.local` (locally) or your Vercel project env vars:
-   ```
-   UPSTASH_REDIS_REST_URL=https://...upstash.io
-   UPSTASH_REDIS_REST_TOKEN=...
-   ```
-
-### Deploy
-
-```bash
-npm install -g vercel
-vercel login
-vercel --prod
-```
-
-That gives you a `*.vercel.app` URL. Add a custom domain through your DNS provider
-(Cloudflare in our case — a single `A` record pointing `calchat` at `76.76.21.21`, or the
-CNAME Vercel recommends).
-
-### Verifying persistence
-
-A diagnostic endpoint at `/api/health` performs a real Redis SET+GET round-trip and
-reports `persistentStore: connected` or `in-memory fallback`. Useful when the integration's
-env var names don't match what the code expects.
-
----
-
-## Project layout
+## Project structure
 
 ```
 app/
-  layout.tsx                     — root layout, Inter Tight + JetBrains Mono via next/font
-  page.tsx                       — landing / create event
-  globals.css                    — brand tokens, stacking, click-ripple keyframes
-  sitemap.ts, robots.ts          — SEO surfaces
-  opengraph-image.tsx            — 1200×630 OG card via next/og (edge runtime)
-  event/[id]/page.tsx            — main event UI; orchestrates the three modes
-  api/
-    events/route.ts                                  — POST create event
-    events/[id]/route.ts                             — GET event
-    events/[id]/participants/route.ts                — PUT upsert participant
-    health/route.ts                                  — Redis connection diagnostic
-
+  page.tsx                    landing: server-rendered copy, WebApplication + FAQPage JSON-LD
+  layout.tsx                  root metadata, metadataBase, fonts
+  event/[id]/                 the planner — three modes, noindex (links are private)
+  api/events/                 create · fetch · upsert participant · health
+  llms.txt/, robots.ts,       machine-readable surfaces for search and answer engines
+    sitemap.ts, opengraph-image.tsx, apple-icon.tsx
 components/
-  AvailabilityGrid.tsx           — 7-day × 48-cell grid; edit + view modes; touch-action
-                                   locked in edit mode so phones can drag-select
-  CommonTimesCalendar.tsx        — week-grid calendar of overlap blocks + filters
-  WeeklyPatternHeatmap.tsx       — recurring sweet-spots view (day × hour, all weeks)
-  WeekNavigator.tsx              — prev/next week + month/year jump + Today
-  DatePicker.tsx                 — custom dark-theme picker, portaled to body
-  QuickAdd.tsx                   — bulk day-range + time-range, repeats N weeks
-  ColorPicker.tsx                — 22-swatch palette with taken-indicator
-  OnboardingDialog.tsx           — name + TZ + colour on first visit; "Continue as X"
-  ParticipantList.tsx            — colored chip list + "this is me" claim
-  ParticipantFilter.tsx          — multi-select dropdown for Common-times view
-  NotesBoard.tsx                 — per-participant notes (editable only by author)
-  HoverDetails.tsx               — per-cell who's-free panel
-  TimezonePicker.tsx             — searchable IANA zone picker
-  ShareBar.tsx                   — copyable URL bar
-  ThreeBackground.tsx            — timezone dials + calendar shards + cursor magnetism
-
+  AvailabilityGrid.tsx        7-day × 48-cell grid, drag-select, touch-locked on phones
+  CommonTimesCalendar.tsx     overlap blocks at real times + participant filter
+  WeeklyPatternHeatmap.tsx    recurring sweet-spots across all weeks
+  ThreeBackground.tsx         timezone dials + calendar shards + scroll staging
+  QuickAdd.tsx, DatePicker.tsx, TimezonePicker.tsx, ColorPicker.tsx, …
 lib/
-  redis.ts                       — Upstash client with multi-env-name detection
-                                   and in-memory dev fallback
-  timezone.ts                    — Luxon helpers, slot math, IANA zone catalog
-  overlap.ts                     — set intersection + region grouping
-  colors.ts                      — 22-colour palette + uniqueness helpers
-  types.ts                       — CalendarEvent / Participant types
-
-public/brand/                    — CalChat logo lockups, favicon, apple-touch-icon
-                                   (do not recolor — terracotta accent reserved for overlap)
+  timezone.ts                 Luxon helpers, slot math, IANA zone catalog
+  overlap.ts                  set intersection + region grouping
+  redis.ts                    Upstash client with multi-env-name detection + dev fallback
+  colors.ts                   22-colour palette + uniqueness helpers
 ```
-
----
 
 ## License
 
-Personal project — feel free to use ideas, please don't copy the brand assets in
-`public/brand/`. Built by [Rian Fernando](https://rianfernando.com).
+[MIT](LICENSE) © Rian Fernando. The brand assets in `public/brand/` are **not** covered by the
+MIT grant — please don't reuse the CalChat mark or wordmark for your own project.
