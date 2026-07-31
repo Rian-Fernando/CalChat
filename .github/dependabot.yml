@@ -6,25 +6,55 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      # Minor and patch only. Grouping majors together produces a single PR that
+      # can never go green — the first attempt bundled TypeScript 7, ESLint 10,
+      # Tailwind 4 and eslint-config-next 16 into one changeset.
       dev-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
     labels:
       - dependencies
     ignore:
-      # These majors are deliberate migrations, not automated bumps:
-      #  - React 19 needs react + react-dom upgraded together, and @react-three/fiber
-      #    v8 targets React 18 — moving to 19 means moving to fiber v9 as well.
-      #  - Next 15 changes params/searchParams to Promises in the App Router,
-      #    which touches every route in app/.
-      #  - three ships breaking renames on minor bumps and is pinned to the
-      #    @types/three and drei versions the scene is built against.
+      # Majors below are deliberate migrations, not automated bumps. Each is
+      # pinned to the Next 14 / React 18 line this app is built on:
+      #
+      #   next 15+          turns App Router params/searchParams into Promises,
+      #                     which touches every route under app/.
+      #   eslint-config-next tracks the Next major; 16 expects Next 16.
+      #   react 19          needs react-dom moved with it, and @react-three/fiber
+      #                     v8 targets React 18 — so fiber v9 comes too.
+      #   eslint 9+         requires migrating to flat config.
+      #   typescript 7      is the native port; Next 14's TS setup check can't
+      #                     resolve it and `next lint` dies on startup.
+      #   tailwindcss 4     replaces tailwind.config.ts with CSS-first config,
+      #                     which would strip the ink/accent/control tokens.
+      #   three             ships breaking renames on minors, and @types/three
+      #                     plus drei are matched to the version the scene uses.
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-config-next"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "next"
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
       - dependency-name: "three"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@types/three"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "@react-three/fiber"
         update-types: ["version-update:semver-major"]
