@@ -16,12 +16,19 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Typecheck
-        run: npx tsc --noEmit
       - name: Lint
         run: npm run lint
-      # No env vars are set here on purpose: lib/redis.ts falls back to an
-      # in-memory store when Upstash isn't configured, so the build exercises
-      # the same code path a fresh clone would.
+      # Build first, and not only because it's the primary gate: next-env.d.ts
+      # is gitignored (create-next-app's default) and is what pulls in Next's
+      # type references, including the declarations that make a side-effect
+      # `import "./globals.css"` resolve. `next build` regenerates it. Running
+      # tsc before this point fails with TS2882 on TypeScript versions that
+      # treat an unresolved side-effect import as an error.
+      #
+      # No env vars are set on purpose: lib/redis.ts falls back to an in-memory
+      # store when Upstash isn't configured, so this exercises the same code
+      # path a fresh clone would.
       - name: Build
         run: npm run build
+      - name: Typecheck
+        run: npx tsc --noEmit
