@@ -65,7 +65,7 @@ event id *is* the credential, and identity is a nanoid held in `localStorage`.
 - **Group overlap heatmap** — every cell splits into vertical stripes, one per participant in
   their colour. Filled stripe = free, dim = busy, and a glow border marks total agreement.
 - **Common-times calendar** — overlap blocks positioned at their **real times** and sized by
-  duration, filterable by participant ("what works for Rian + Wei, ignoring Niharika").
+  duration, filterable by participant ("what works for Rian + Amber, ignoring Niharika").
 - **Recurring sweet-spots** — a day × hour heatmap aggregated across every week in the event,
   surfacing "Tuesday evenings work nearly every week".
 - **One link, any week** — the same URL covers every week from now through next year, with
@@ -87,7 +87,7 @@ Each 30-minute cell maps to exactly two consecutive slots, and overlap is set in
 |---|---|---|
 | Rian | Monday 8:30 PM | `America/New_York` |
 | Niharika | Tuesday 6:00 AM | `Asia/Kolkata` |
-| Wei | Tuesday 8:30 AM | `Asia/Shanghai` |
+| Amber | Tuesday 8:30 AM | `Asia/Shanghai` |
 
 Three different days-of-week on three different calendars. CalChat reports a **60-minute
 three-way overlap**, and each viewer sees that same UTC window in their own local time —
