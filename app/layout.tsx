@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -15,6 +16,16 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   display: "swap"
 });
+
+/* Feedex feedback widget (feedex.rianfernando.com).
+ *
+ * The key is publishable — it only lets the holder file feedback against this
+ * one project — so it's a NEXT_PUBLIC_ var inlined into the client bundle by
+ * design. It's read into a constant rather than referenced inline so the widget
+ * can be skipped entirely when it's unset: a local clone or a fork has no key,
+ * and loading widget.js with an empty data-feedex-key would just 401 on every
+ * page view. */
+const FEEDEX_KEY = process.env.NEXT_PUBLIC_FEEDEX_KEY;
 
 const SITE_URL = "https://calchat.rianfernando.com";
 const SITE_TITLE = "CalChat — find a call time across timezones";
@@ -74,7 +85,33 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${interTight.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+
+        {/* Feedex widget, mounted site-wide so a report can be filed from the
+            planner itself — where a timezone bug would actually be noticed —
+            and not just from the landing page.
+
+            theme is pinned to dark rather than left on "auto": CalChat only
+            ships the dark palette, so an auto widget would render light for
+            anyone whose OS is set that way and sit on the page as a white box.
+            accent is the brand terracotta, replacing the default purple.
+
+            lazyOnload keeps it off the critical path — it loads after the page
+            is interactive, so it doesn't spend the LCP/CLS headroom the rest of
+            the page was tuned for. */}
+        {FEEDEX_KEY && (
+          <Script
+            src="https://feedex.rianfernando.com/widget.js"
+            strategy="lazyOnload"
+            data-feedex-key={FEEDEX_KEY}
+            data-feedex-theme="dark"
+            data-feedex-accent="#d9876d"
+            data-feedex-title="Send feedback"
+            data-feedex-description="Found a bug, a timezone that didn't line up, or an idea? Tell us — no account needed."
+          />
+        )}
+      </body>
     </html>
   );
 }
