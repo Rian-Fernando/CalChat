@@ -546,9 +546,16 @@ export default function EventPage() {
       </main>
 
       {/* Sticky bottom Save bar — phones only, edit mode only. Keeps Save reachable
-          after dragging through the long grid so users don't have to scroll up. */}
+          after dragging through the long grid so users don't have to scroll up.
+
+          z-above-widget rather than z-30: this shares the bottom-right corner
+          with the Feedex launcher, whose shadow-root stacking sits at
+          2147483000, and a floating Feedback button covering Save is not a
+          trade worth making. Fully opaque rather than /95 for the same reason —
+          now that it genuinely floats, a 5% bleed of the terracotta launcher
+          behind it reads as a smudge. */}
       {mode === "edit" && participantId && (
-        <div className="above-bg fixed bottom-0 left-0 right-0 z-30 border-t border-ink-700 bg-ink-950/95 px-4 py-3 backdrop-blur-lg sm:hidden">
+        <div className="above-bg fixed bottom-0 left-0 right-0 z-above-widget border-t border-ink-700 bg-ink-950 px-4 py-3 backdrop-blur-lg sm:hidden">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs text-ink-300">
               {selected.size > 0 ? (

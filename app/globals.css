@@ -47,10 +47,21 @@ body::before {
   pointer-events: none;
 }
 
-/* Anything that should sit ON TOP of the canvas just gets .above-bg */
-.above-bg {
-  position: relative;
-  z-index: 10;
+/* Anything that should sit ON TOP of the canvas just gets .above-bg.
+ *
+ * It has to live in @layer components rather than as bare CSS. Declared
+ * outside a layer it was emitted *after* @tailwind utilities, so at equal
+ * specificity it beat any utility it was combined with on source order alone —
+ * `above-bg fixed bottom-0 z-30` silently computed to position:relative and
+ * z-index:10. That un-stuck the mobile save bar (it rendered inline at the
+ * foot of a very long grid, the exact thing it exists to avoid) and stopped
+ * the skip link pinning itself on focus. In the components layer, utilities
+ * win as they should. */
+@layer components {
+  .above-bg {
+    position: relative;
+    z-index: 10;
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

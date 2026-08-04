@@ -58,6 +58,15 @@ const config: Config = {
           soft: "#e3a995"       // soft tint for hover states / availability washes
         }
       },
+      zIndex: {
+        /* One above the Feedex widget's .fx-root (2147483000). The widget mounts
+           in a shadow root, so its stacking can't be reached from here — the only
+           lever is to out-rank it. Reserved for UI that must never be sat on: the
+           phone save bar shares the bottom-right corner with the widget launcher,
+           and a floating Feedback button covering Save is not a trade worth
+           making. */
+        "above-widget": "2147483001"
+      },
       animation: {
         "fade-in": "fade-in 0.4s ease-out both",
         "pulse-soft": "pulse-soft 2.4s ease-in-out infinite"
