@@ -11,7 +11,7 @@
   "dependencies": {
     "@react-three/drei": "^9.114.0",
     "@react-three/fiber": "^8.17.10",
-    "@upstash/redis": "^1.34.3",
+    "@upstash/redis": "^1.38.2",
     "luxon": "^3.5.0",
     "nanoid": "^6.0.0",
     "next": "^14.2.35",
